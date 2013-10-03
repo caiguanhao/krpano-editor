@@ -1,0 +1,30 @@
+block variables
+
+doctype 5
+html
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0')
+    title= title + " - krpano-editor"
+    != css('application')
+    != js('application')
+  body
+    nav.navbar.navbar-default(role='navigation')
+      .container
+        .navbar-header
+          button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-ex1-collapse')
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href='/') krpano-editor
+        .collapse.navbar-collapse.navbar-ex1-collapse
+          ul.nav.navbar-nav
+            li.dropdown
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
+                | Virtual Tours
+                b.caret
+              ul.dropdown-menu
+                li
+                  a(href='/tours/new') Create
+    block content
