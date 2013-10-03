@@ -13,8 +13,10 @@ app.use assets
   buildDir: './public' # do not use full path
 
 index = require './routes/index'
+tours = require './routes/tours'
 
 app.get '/', index
+app.get '/tours/new', tours.new
 
 app.use (req, res) ->
   res.status(404).render '404'

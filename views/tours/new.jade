@@ -1,0 +1,27 @@
+block variables
+  title = "Create Virtual Tours"
+
+extends ../layout
+
+block content
+  article.container(role='main')
+    ol.breadcrumb
+      li
+        a(href='/') Home
+      li
+        a(href='/tours') Tours
+      li.active Create
+    .row
+      .col-md-offset-2.col-md-8
+        form.form-horizontal(role='form')
+          .form-group
+            label.col-lg-2.control-label(for='inputEmail1') Name
+            .col-lg-10
+              input.form-control(type='text', placeholder='Name of virtual tour')
+          .form-group
+            label.col-lg-2.control-label(for='inputPassword1') Description
+            .col-lg-10
+              input.form-control(type='text', placeholder='Description of virtual tour')
+          .form-group
+            .col-lg-offset-2.col-lg-10
+              button.btn.btn-default(type='submit') Create Virtual Tour
