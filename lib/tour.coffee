@@ -1,3 +1,20 @@
+exports.list = (client, req, callback) ->
+  client.lrange 'tours', 0, -1, (err, _tours) ->
+    if _tours.length == 0
+      callback { error: err}
+      return
+
+    tours = []
+    _tours.forEach (tour) ->
+      client.hgetall tour, (err, tour) ->
+        if err
+          callback { error: err}
+        else
+          tours.push tour
+
+        if tours.length == _tours.length
+          callback { error: err}, tours
+
 exports.add = (client, req, callback) ->
 
   tour_name = req.body.name.trim()
@@ -10,5 +27,19 @@ exports.add = (client, req, callback) ->
 
   if err_msg
     callback { error: err_msg }
-  else
-    callback { info: 'Successfully created a tour.' }
+    return
+
+  tour_id = client.incr 'tours:count', (err, id) ->
+    if err
+      callback { error: err }
+    else
+      key = 'tours:' + id
+
+      client.lpush 'tours', key
+      client.hmset key,
+        id: id
+        created_at: Math.round(Date.now() / 1000)
+        name: tour_name
+        desc: tour_desc
+
+      callback { info: 'Successfully created a tour.' }
