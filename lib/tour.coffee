@@ -30,8 +30,8 @@ exports.list = (client, req, next, callback) ->
 
 exports.add = (client, req, next, callback) ->
 
-  tour_name = req.body.name.trim()
-  tour_desc = req.body.desc.trim()
+  tour_name = if req.body.name then req.body.name.trim() else ''
+  tour_desc = if req.body.desc then req.body.desc.trim() else ''
 
   err_msg = switch true
     when tour_name.length == 0 then 'Name must not be empty.'

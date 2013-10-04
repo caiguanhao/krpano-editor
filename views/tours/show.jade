@@ -17,3 +17,17 @@ block content
         a(href='/tours/'+tours.id+'/edit') Edit
     h2= tours.name
     h5= tours.desc
+    .text-right
+      a.btn.btn-primary(href='/tours/'+tours.id+'/panoramas/new')
+        span.glyphicon.glyphicon-plus
+        | Add Panoramas
+    table.table
+      thead
+        tr
+          th Name
+          th Image
+          th Description
+          th Created At
+      tbody
+        tr
+          td

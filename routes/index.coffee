@@ -1,4 +1,5 @@
 tour = require '../lib/tour'
+panorama = require '../lib/panorama'
 
 module.exports = (app, client) ->
 
@@ -49,3 +50,13 @@ module.exports = (app, client) ->
     tour.delete client, req, next, (status) ->
       req.session.messages.push status
       res.redirect '/tours'
+
+  app.get '/tours/:tour_id/panoramas/new', (req, res, next) ->
+    panorama.tour_exists client, req, next, (status, tours) ->
+      req.session.messages.push status
+      res.render 'panoramas/new', { tours: tours }
+
+  app.post '/tours/:tour_id/panoramas', (req, res, next) ->
+    panorama.add client, req, next, (status, tours) ->
+      req.session.messages.push status
+      res.render 'panoramas/new', { body: req.body, tours: tours }

@@ -9,10 +9,12 @@ client = redis.createClient()
 app.set 'port', process.env.PORT || 3000
 app.set 'view engine', 'jade'
 app.set 'views', __dirname + '/views'
+app.set 'tmp_upload_dir', './tmp/uploads'
 
 app.use express.logger('dev')
 app.use express.static(__dirname + '/public')
-app.use express.bodyParser()
+app.use express.bodyParser
+  uploadDir: app.get 'tmp_upload_dir'
 app.use assets
   buildDir: './public' # do not use full path
 app.use express.methodOverride()
@@ -25,7 +27,6 @@ app.use (req, res, next) ->
   next()
 
 routes = require './routes'
-
 routes app, client
 
 app.use (req, res) ->
