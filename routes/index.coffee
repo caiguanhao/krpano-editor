@@ -16,7 +16,7 @@ module.exports = (app, client) ->
       else if tours
         view = switch req.params.action
           when undefined then 'tours/show'
-          when 'edit' then 'tours/edit'
+          when 'edit', 'delete' then 'tours/' + req.params.action
         if view
           req.session.messages.push status
           res.render view, { tours: tours }
@@ -40,3 +40,11 @@ module.exports = (app, client) ->
         res.render 'tours/edit', { body: req.body, tours: tours }
       else
         res.redirect '/tours/' + tours.id
+
+  app.delete '/tours/:id', (req, res, next) ->
+    if !req.body.confirm or req.body.confirm != 'yes'
+      res.redirect '/tours/' + req.params.id
+      return
+    tour.delete client, req, next, (status) ->
+      req.session.messages.push status
+      res.redirect '/tours'

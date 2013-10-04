@@ -15,6 +15,7 @@ app.use express.static(__dirname + '/public')
 app.use express.bodyParser()
 app.use assets
   buildDir: './public' # do not use full path
+app.use express.methodOverride()
 app.use express.cookieParser()
 app.use express.session
   secret: 'LWOM0nhYrnVwm93p'

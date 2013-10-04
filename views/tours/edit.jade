@@ -12,7 +12,9 @@ block content
         a(href='/tours') Tours
       li
         a(href='/tours/'+tours.id)= tours.name
-      li.active Edit
+      li.pull-right
+        a(href='/tours/'+tours.id+'/delete') Delete
+      li.pull-right.active Edit
     .row
       .col-md-offset-2.col-md-8
         form.form-horizontal(role='form', action='/tours/'+tours.id, method='POST')

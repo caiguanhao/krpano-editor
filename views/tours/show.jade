@@ -12,6 +12,8 @@ block content
         a(href='/tours') Tours
       li.active= tours.name
       li.pull-right
+        a(href='/tours/'+tours.id+'/delete') Delete
+      li.pull-right
         a(href='/tours/'+tours.id+'/edit') Edit
     h2= tours.name
     h5= tours.desc
