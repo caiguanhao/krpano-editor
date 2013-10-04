@@ -23,15 +23,16 @@ module.exports = (app, client) ->
         else
           next()
       else
-        next()
+        req.session.messages.push { warning: 'No virutal tours.' }
+        res.redirect '/'
 
-  app.post '/tours', (req, res) ->
-    tour.add client, req, (status) ->
+  app.post '/tours', (req, res, next) ->
+    tour.add client, req, next, (status, tours) ->
       req.session.messages.push status
       if status.error
         res.render 'tours/new', { body: req.body }
       else
-        res.render 'tours/new'
+        res.redirect 'tours/' + tours.id
 
   app.post '/tours/:id', (req, res, next) ->
     tour.update client, req, next, (status, tours) ->

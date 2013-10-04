@@ -14,7 +14,7 @@ exports.list = (client, req, next, callback) ->
 
   client.lrange 'tours', 0, -1, (err, _tours) ->
     if _tours.length == 0
-      callback { error: err}
+      callback { error: err }
       return
 
     tours = []
@@ -28,7 +28,7 @@ exports.list = (client, req, next, callback) ->
         if tours.length == _tours.length
           callback { error: err }, tours
 
-exports.add = (client, req, callback) ->
+exports.add = (client, req, next, callback) ->
 
   tour_name = req.body.name.trim()
   tour_desc = req.body.desc.trim()
@@ -55,7 +55,7 @@ exports.add = (client, req, callback) ->
         name: tour_name
         desc: tour_desc
 
-      callback { success: 'Successfully created a tour.' }
+      callback { success: 'Successfully created a tour.' }, { id: id }
 
 exports.update = (client, req, next, callback) ->
 
