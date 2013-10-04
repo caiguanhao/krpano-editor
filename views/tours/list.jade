@@ -20,5 +20,8 @@ block content
           tr
             td
               a(href='/tours/'+tour.id)= tour.name
+              = ' ['
+              a(href='/tours/'+tour.id+'/edit') edit
+              | ]
             td= tour.desc
             td= tour.created_at

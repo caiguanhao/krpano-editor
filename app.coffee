@@ -15,6 +15,13 @@ app.use express.static(__dirname + '/public')
 app.use express.bodyParser()
 app.use assets
   buildDir: './public' # do not use full path
+app.use express.cookieParser()
+app.use express.session
+  secret: 'LWOM0nhYrnVwm93p'
+app.use (req, res, next) ->
+  req.session.messages = [] if !req.session.messages
+  res.locals.messages = req.session.messages
+  next()
 
 routes = require './routes'
 

@@ -56,3 +56,38 @@ exports.add = (client, req, callback) ->
         desc: tour_desc
 
       callback { info: 'Successfully created a tour.' }
+
+exports.update = (client, req, next, callback) ->
+
+  tour_id = req.params.id
+
+  key = 'tours:' + tour_id
+  client.exists key, (err, exists) ->
+    if err or exists == 0
+      next()
+      return
+
+    client.hgetall key, (err, tour) ->
+      if err
+        next()
+        return
+
+      tour_name = req.body.name.trim()
+      tour_desc = req.body.desc.trim()
+
+      err_msg = switch true
+        when tour_name.length == 0 then 'Name must not be empty.'
+        when tour_name.length > 30 then 'Name is too long. (<=30)'
+        when tour_desc.length > 100 then 'Description is too long. (<=100)'
+
+      if err_msg
+        callback { error: err_msg }, tour
+        return
+
+      if tour_name == tour.name and tour_desc == tour.desc
+        callback { warning: 'Nothing changes.' }, tour
+      else
+        client.hmset key,
+          name: tour_name
+          desc: tour_desc
+        callback { info: 'Successfully updated a tour.' }, tour

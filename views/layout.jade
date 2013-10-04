@@ -21,7 +21,7 @@ html
         .collapse.navbar-collapse.navbar-ex1-collapse
           ul.nav.navbar-nav
             li.dropdown
-              a.dropdown-toggle(href='#', data-toggle='dropdown')
+              a.dropdown-toggle(href='/tours', data-toggle='dropdown')
                 | Virtual Tours
                 b.caret
               ul.dropdown-menu
@@ -31,3 +31,10 @@ html
                 li
                   a(href='/tours/new') Create
     block content
+    - if (messages && messages.length > 0)
+      != '<script>'
+      - while (message = messages.pop())
+        - for (msg in message)
+          - if (message[msg])
+            != 'toastr["' + msg + '"]("' + message[msg] + '");'
+      != '</script>'
