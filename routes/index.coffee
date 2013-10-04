@@ -8,9 +8,14 @@ module.exports = (app, client) ->
   app.get '/tours/new', (req, res) ->
     res.render 'tours/new'
 
-  app.get '/tours', (req, res) ->
-    tour.list client, req, (status, tours) ->
-      res.render 'tours/list', { status: status, tours: tours }
+  app.get '/tours/:id?', (req, res, next) ->
+    tour.list client, req, next, (status, tours) ->
+      if tours instanceof Array
+        res.render 'tours/list', { status: status, tours: tours || [] }
+      else if tours
+        res.render 'tours/show', { status: status, tours: tours }
+      else
+        next()
 
   app.post '/tours', (req, res) ->
     tour.add client, req, (status) ->

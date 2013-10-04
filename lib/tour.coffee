@@ -1,4 +1,17 @@
-exports.list = (client, req, callback) ->
+exports.list = (client, req, next, callback) ->
+
+  tour_id = req.params.id
+
+  if tour_id
+    key = 'tours:' + tour_id
+    client.exists key, (err, exists) ->
+      if err or exists == 0
+        next()
+        return
+      client.hgetall key, (err, tour) ->
+        callback { error: err }, tour
+    return
+
   client.lrange 'tours', 0, -1, (err, _tours) ->
     if _tours.length == 0
       callback { error: err}
@@ -8,12 +21,12 @@ exports.list = (client, req, callback) ->
     _tours.forEach (tour) ->
       client.hgetall tour, (err, tour) ->
         if err
-          callback { error: err}
+          callback { error: err }
         else
           tours.push tour
 
         if tours.length == _tours.length
-          callback { error: err}, tours
+          callback { error: err }, tours
 
 exports.add = (client, req, callback) ->
 

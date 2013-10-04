@@ -1,0 +1,15 @@
+block variables
+  title = tours.name + " - Virtual Tours"
+
+extends ../layout
+
+block content
+  article.container(role='main')
+    ol.breadcrumb
+      li
+        a(href='/') Home
+      li
+        a(href='/tours') Tours
+      li.active= tours.name
+    h2= tours.name
+    h5= tours.desc
