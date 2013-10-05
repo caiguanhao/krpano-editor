@@ -64,7 +64,29 @@ module.exports = (app, client) ->
       else
         res.redirect '/tours/' + tours.id + '/panoramas/' + panos.id
 
-  app.get '/tours/:tour_id/panoramas/:pano_id', (req, res, next) ->
+  app.get '/tours/:tour_id/panoramas/:pano_id/:action?', (req, res, next) ->
     panorama.pano_exists client, req, next, (status, tours, panos) ->
+      view = switch req.params.action
+        when undefined then 'panoramas/show'
+        when 'edit', 'delete' then 'panoramas/' + req.params.action
+      if view
+        req.session.messages.push status
+        res.render view, { tours: tours, panos: panos }
+      else
+        next()
+
+  app.post '/tours/:tour_id/panoramas/:pano_id', (req, res, next) ->
+    panorama.update client, req, next, (status, tours, panos) ->
       req.session.messages.push status
-      res.render 'panoramas/show', { tours: tours, panos: panos }
+      if status.error
+        res.render 'panoramas/edit', { body: req.body, tours: tours, panos: panos }
+      else
+        res.redirect '/tours/' + tours.id + '/panoramas/' + panos.id
+
+  app.delete '/tours/:tour_id/panoramas/:pano_id', (req, res, next) ->
+    if !req.body.confirm or req.body.confirm != 'yes'
+      res.redirect '/tours/' + req.params.tour_id + '/panoramas/' + req.params.pano_id
+      return
+    panorama.delete client, req, next, (status) ->
+      req.session.messages.push status
+      res.redirect '/tours/' + req.params.tour_id

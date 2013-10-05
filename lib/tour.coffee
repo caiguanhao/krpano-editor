@@ -13,14 +13,15 @@ exports.list = (client, req, next, callback) ->
           if err or num == 0 then callback { error: err }, tour; return
           panos = []
           client.smembers key + ':panos', (err, members) ->
+            count = 0
             members.forEach (member) ->
               client.hgetall member, (err, pano) ->
                 if err
                   callback { error: err }, tour
-                else
+                else if pano
                   panos.push pano
-
-                if panos.length == num
+                count += 1
+                if count == num
                   callback { error: err }, tour, panos
     return
 

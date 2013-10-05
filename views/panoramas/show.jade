@@ -13,5 +13,9 @@ block content
       li
         a(href='/tours/'+tours.id)= tours.name
       li.active= panos.name
+      li.pull-right
+        a(href='/tours/'+tours.id+'/panoramas/'+panos.id+'/delete') Delete
+      li.pull-right
+        a(href='/tours/'+tours.id+'/panoramas/'+panos.id+'/edit') Edit
     h2= panos.name
     h5= panos.desc

@@ -89,6 +89,48 @@ exports.add = (client, req, next, callback) ->
           created_at: Math.round(Date.now() / 1000)
           name: pano_name
           desc: pano_desc
-          image: new_path
+          image: new_path.replace req.app.get('public_dir'), ''
 
         callback { success: 'Successfully created a panorama.' }, tour, { id: id }
+
+exports.update = (client, req, next, callback) ->
+  pano_exists client, req, next, (status, tour, pano) ->
+
+    pano_name = if req.body.name then req.body.name.trim() else ''
+    pano_desc = if req.body.desc then req.body.desc.trim() else ''
+    pano_image = if req.body.image then req.body.image.trim() else ''
+
+    err_msg = switch true
+      when pano_name.length == 0 then 'Name must not be empty.'
+      when pano_name.length > 30 then 'Name is too long. (<=30)'
+      when pano_desc.length > 100 then 'Description is too long. (<=100)'
+      when pano_image.length == 0 then 'Please select an image.'
+      when pano_image.length > 256 then 'Image path is too long. (<=256)'
+
+    if req.files.new_image and req.files.new_image.size == 0
+      fs.unlinkSync req.files.new_image.path
+
+    if err_msg
+      callback { error: err_msg }, tour, pano
+      return
+
+    if pano_name == pano.name and pano_desc == pano.desc and pano_image == pano.image
+      callback { warning: 'Nothing changes.' }, tour, pano
+    else
+      pano_key = 'panos:' + pano.id
+      client.hmset pano_key,
+        name: pano_name
+        desc: pano_desc
+        image: pano_image
+
+      callback { success: 'Successfully updated a panorama.' }, tour, pano
+
+exports.delete = (client, req, next, callback) ->
+  pano_exists client, req, next, (status, tour, pano) ->
+    tour_key = 'tours:' + tour.id
+    pano_key = 'panos:' + pano.id
+    client.del pano_key
+    client.srem tour_key + ':panos', pano_key
+    client.lrem 'panos', 0, pano_key
+
+    callback { success: 'Successfully deleted a panorama.' }

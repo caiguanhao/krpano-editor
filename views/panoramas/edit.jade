@@ -1,0 +1,41 @@
+block variables
+  title = "Edit Panoramas"
+
+extends ../layout
+
+block content
+  article.container(role='main')
+    ol.breadcrumb
+      li
+        a(href='/') Home
+      li
+        a(href='/tours') Tours
+      li
+        a(href='/tours/'+tours.id)= tours.name
+      li
+        a(href='/tours/'+tours.id+'/panoramas/'+panos.id)= panos.name
+      li.pull-right
+        a(href='/tours/'+tours.id+'/panoramas/'+panos.id+'/delete') Delete
+      li.pull-right.active Edit
+    .row
+      .col-md-offset-2.col-md-8
+        form.form-horizontal(role='form', action='/tours/'+tours.id+'/panoramas/'+panos.id, method='POST', enctype='multipart/form-data')
+          .form-group
+            label.col-lg-2.control-label(for='inputName') Name
+            .col-lg-10
+              input#inputName.form-control(type='text', name='name', value=body?body.name:panos.name, placeholder='Name of panorama')
+          .form-group
+            label.col-lg-2.control-label(for='inputDesc') Description
+            .col-lg-10
+              input#inputDesc.form-control(type='text', name='desc', value=body?body.desc:panos.desc, placeholder='Description of panorama')
+          .form-group
+            label.col-lg-2.control-label(for='inputImage') Image
+            .col-lg-10
+              input#inputImage.form-control(type='text', name='image', value=body?body.image:panos.image, placeholder='Image of panorama')
+          .form-group
+            label.col-lg-2.control-label(for='inputNewImage') Upload New Image
+            .col-lg-10
+              input#inputNewImage(type='file', name='new_image')
+          .form-group
+            .col-lg-offset-2.col-lg-10
+              button.btn.btn-default(type='submit') Update Panorama
