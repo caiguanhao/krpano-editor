@@ -64,6 +64,10 @@ module.exports = (app, client) ->
       else
         res.redirect '/tours/' + tours.id + '/panoramas/' + panos.id
 
+  app.get '/tours/:tour_id/panoramas/:pano_id.xml', (req, res, next) ->
+    panorama.pano_exists client, req, next, (status, tours, panos) ->
+      res.render 'xml/tours', { tours: tours, panos: panos }
+
   app.get '/tours/:tour_id/panoramas/:pano_id/:action?', (req, res, next) ->
     panorama.pano_exists client, req, next, (status, tours, panos) ->
       view = switch req.params.action

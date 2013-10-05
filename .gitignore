@@ -15,5 +15,6 @@ node_modules
 
 public/css/*.css
 public/js/*.js
+public/swf/*.license
 public/uploads/*
 tmp/uploads/*

@@ -19,3 +19,6 @@ block content
         a(href='/tours/'+tours.id+'/panoramas/'+panos.id+'/edit') Edit
     h2= panos.name
     h5= panos.desc
+    #pano
+    script.
+      embedpano({ swf: '/swf/krpano.swf', xml: '/tours/!{tours.id}/panoramas/!{panos.id}.xml', target: 'pano', html5: 'auto', passQueryParameters: true });
