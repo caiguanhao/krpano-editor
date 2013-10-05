@@ -31,29 +31,31 @@ pano_exists = (client, req, next, callback) ->
 
 exports.pano_exists = pano_exists
 
-save_upload_image = (image_path, upload_dir, tour, callback) ->
+save_upload_image = (image_path, app, tour, pano, callback) ->
   gm = require 'gm'
   gm(image_path).format (err, value) ->
     if err
-      callback { error: err.toString() }, tour
+      fs.unlinkSync image_path
+      callback { error: err.toString() }, tour, pano
     else if value != 'JPEG'
-      callback { error: 'Image is not an JPEG file.' }, tour
+      fs.unlinkSync image_path
+      callback { error: 'Image is not an JPEG file.' }, tour, pano
     else
       md5 = require('crypto').createHash 'md5'
       stream = fs.ReadStream image_path
       stream.on 'data', (d) -> md5.update d
       stream.on 'end', ->
         md5sum = md5.digest('hex')
-        new_path = upload_dir + '/' + md5sum[0]
+        new_path = app.get('upload_dir') + '/' + md5sum[0]
         fs.mkdir new_path, '0755', (error) ->
-          if error and error.errno != 47 then callback { error: error }, tour; return
+          if error and error.errno != 47 then callback { error: error }, tour, pano; return
           new_path += '/' + md5sum[1]
           fs.mkdir new_path, '0755', (error) ->
-            if error and error.errno != 47 then callback { error: error }, tour; return
+            if error and error.errno != 47 then callback { error: error }, tour, pano; return
             new_path += '/' + md5sum + '.jpg'
             fs.rename image_path, new_path, (error) ->
-              if error then callback { error: error }, tour; return
-              callback {}, tour, new_path
+              if error then callback { error: error }, tour, pano; return
+              callback {}, tour, pano, new_path.replace app.get('public_dir'), ''
 
 exports.add = (client, req, next, callback) ->
   tour_exists client, req, next, (status, tour) ->
@@ -66,17 +68,14 @@ exports.add = (client, req, next, callback) ->
       when pano_name.length == 0 then 'Name must not be empty.'
       when pano_name.length > 30 then 'Name is too long. (<=30)'
       when pano_desc.length > 100 then 'Description is too long. (<=100)'
-      when !req.files.image then 'Please select an image to upload.'
-
-    if req.files.image and req.files.image.size == 0
-      fs.unlinkSync req.files.image.path
-      err_msg = 'Please select an image to upload.'
+      when !req.files.image or req.files.image.size == 0 then 'Please select an image to upload.'
 
     if err_msg
+      fs.unlinkSync req.files.image.path if req.files.image
       callback { error: err_msg }, tour
       return
 
-    save_upload_image req.files.image.path, req.app.get('upload_dir'), tour, (status, tour, new_path) ->
+    save_upload_image req.files.image.path, req.app, tour, null, (status, tour, pano, new_path) ->
       if status.error then callback { error: status.error }, tour; return
       client.incr 'panos:count', (err, id) ->
         if err then callback { error: err }, tour; return
@@ -89,7 +88,7 @@ exports.add = (client, req, next, callback) ->
           created_at: Math.round(Date.now() / 1000)
           name: pano_name
           desc: pano_desc
-          image: new_path.replace req.app.get('public_dir'), ''
+          image: new_path
 
         callback { success: 'Successfully created a panorama.' }, tour, { id: id }
 
@@ -107,23 +106,36 @@ exports.update = (client, req, next, callback) ->
       when pano_image.length == 0 then 'Please select an image.'
       when pano_image.length > 256 then 'Image path is too long. (<=256)'
 
-    if req.files.new_image and req.files.new_image.size == 0
-      fs.unlinkSync req.files.new_image.path
-
     if err_msg
+      fs.unlinkSync req.files.new_image.path if req.files.new_image
       callback { error: err_msg }, tour, pano
       return
 
-    if pano_name == pano.name and pano_desc == pano.desc and pano_image == pano.image
-      callback { warning: 'Nothing changes.' }, tour, pano
-    else
-      pano_key = 'panos:' + pano.id
-      client.hmset pano_key,
-        name: pano_name
-        desc: pano_desc
-        image: pano_image
+    update = (client, name, desc, image, tour, pano, callback) ->
+      if name == pano.name and desc == pano.desc and image == pano.image
+        callback { warning: 'Nothing changes.' }, tour, pano
+      else
+        pano_key = 'panos:' + pano.id
+        client.hmset pano_key,
+          name: name
+          desc: desc
+          image: image
 
-      callback { success: 'Successfully updated a panorama.' }, tour, pano
+        callback { success: 'Successfully updated a panorama.' }, tour, pano
+
+    path = ''
+    if req.files.new_image
+      path = req.files.new_image.path
+      if req.files.new_image.size == 0
+        fs.unlinkSync path
+        path = ''
+
+    if path.length > 0
+      save_upload_image path, req.app, tour, pano, (status, tour, pano, new_path) ->
+        pano_image = new_path
+        update client, pano_name, pano_desc, pano_image, tour, pano, callback
+    else
+      update client, pano_name, pano_desc, pano_image, tour, pano, callback
 
 exports.delete = (client, req, next, callback) ->
   pano_exists client, req, next, (status, tour, pano) ->
