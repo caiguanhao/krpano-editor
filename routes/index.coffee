@@ -75,7 +75,16 @@ module.exports = (app, client) ->
         when 'edit', 'delete' then 'panoramas/' + req.params.action
       if view
         req.session.messages.push status
-        res.render view, { tours: tours, panos: panos }
+
+        params = { tours: tours, panos: panos }
+        switch req.params.action
+          when 'edit'
+            path = if panos.image then req.app.get('public_dir') + panos.image else ''
+            panorama.image_check path, (results) ->
+              params['image_check'] = results
+              res.render view, params
+          else
+            res.render view, params
       else
         next()
 

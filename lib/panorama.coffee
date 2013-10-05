@@ -1,4 +1,5 @@
 fs = require 'fs'
+gm = require 'gm'
 
 tour_exists = (client, req, next, callback) ->
   tour_id = req.params.tour_id
@@ -32,7 +33,7 @@ pano_exists = (client, req, next, callback) ->
 exports.pano_exists = pano_exists
 
 save_upload_image = (image_path, app, tour, pano, callback) ->
-  gm = require 'gm'
+  if !image_path then callback {}, tour, pano, ''; return
   gm(image_path).format (err, value) ->
     if err
       fs.unlinkSync image_path
@@ -57,6 +58,27 @@ save_upload_image = (image_path, app, tour, pano, callback) ->
               if error then callback { error: error }, tour, pano; return
               callback {}, tour, pano, new_path.replace app.get('public_dir'), ''
 
+image_check = (image_path, callback) ->
+  if !image_path then callback []; return
+  results = [
+    { danger: "Not a valid JPEG." },
+    { danger: "Invalid spherical panoramic image: aspect ratio is not 2:1." },
+    { danger: "The resolution of the image is either too low or too high." },
+  ]
+  gm(image_path).format (err, value) ->
+    if err or value != 'JPEG' then callback results
+    else
+      results[0] = { success: "A valid JPEG." }
+      gm(image_path).size (err, size) ->
+        if err then callback results
+        if size.height * 2 == size.width
+          results[1] = { success: "A valid spherical panoramic image with 2:1 aspect ratio." }
+        if size.width >= 2000 and size.width <= 12000
+          results[2] = { success: "The resolution of the image is neither too low nor too high." }
+        callback results
+
+exports.image_check = image_check
+
 exports.add = (client, req, next, callback) ->
   tour_exists client, req, next, (status, tour) ->
 
@@ -68,14 +90,19 @@ exports.add = (client, req, next, callback) ->
       when pano_name.length == 0 then 'Name must not be empty.'
       when pano_name.length > 30 then 'Name is too long. (<=30)'
       when pano_desc.length > 100 then 'Description is too long. (<=100)'
-      when !req.files.image or req.files.image.size == 0 then 'Please select an image to upload.'
+
+    path = ''
+    if req.files.image
+      path = req.files.image.path 
+      if req.files.image.size == 0
+        fs.unlinkSync path
+        path = ''
 
     if err_msg
-      fs.unlinkSync req.files.image.path if req.files.image
       callback { error: err_msg }, tour
       return
 
-    save_upload_image req.files.image.path, req.app, tour, null, (status, tour, pano, new_path) ->
+    save_upload_image path, req.app, tour, null, (status, tour, pano, new_path) ->
       if status.error then callback { error: status.error }, tour; return
       client.incr 'panos:count', (err, id) ->
         if err then callback { error: err }, tour; return
@@ -103,25 +130,7 @@ exports.update = (client, req, next, callback) ->
       when pano_name.length == 0 then 'Name must not be empty.'
       when pano_name.length > 30 then 'Name is too long. (<=30)'
       when pano_desc.length > 100 then 'Description is too long. (<=100)'
-      when pano_image.length == 0 then 'Please select an image.'
       when pano_image.length > 256 then 'Image path is too long. (<=256)'
-
-    if err_msg
-      fs.unlinkSync req.files.new_image.path if req.files.new_image
-      callback { error: err_msg }, tour, pano
-      return
-
-    update = (client, name, desc, image, tour, pano, callback) ->
-      if name == pano.name and desc == pano.desc and image == pano.image
-        callback { warning: 'Nothing changes.' }, tour, pano
-      else
-        pano_key = 'panos:' + pano.id
-        client.hmset pano_key,
-          name: name
-          desc: desc
-          image: image
-
-        callback { success: 'Successfully updated a panorama.' }, tour, pano
 
     path = ''
     if req.files.new_image
@@ -130,12 +139,22 @@ exports.update = (client, req, next, callback) ->
         fs.unlinkSync path
         path = ''
 
-    if path.length > 0
-      save_upload_image path, req.app, tour, pano, (status, tour, pano, new_path) ->
-        pano_image = new_path
-        update client, pano_name, pano_desc, pano_image, tour, pano, callback
-    else
-      update client, pano_name, pano_desc, pano_image, tour, pano, callback
+    if err_msg
+      callback { error: err_msg }, tour, pano
+      return
+
+    save_upload_image path, req.app, tour, pano, (status, tour, pano, new_path) ->
+      pano_image = new_path
+      if pano_name == pano.name and pano_desc == pano.desc and pano_image == pano.image
+        callback { warning: 'Nothing changes.' }, tour, pano
+      else
+        pano_key = 'panos:' + pano.id
+        client.hmset pano_key,
+          name: pano_name
+          desc: pano_desc
+          image: pano_image
+
+        callback { success: 'Successfully updated a panorama.' }, tour, pano
 
 exports.delete = (client, req, next, callback) ->
   pano_exists client, req, next, (status, tour, pano) ->

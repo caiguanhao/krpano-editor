@@ -32,6 +32,12 @@ block content
             label.col-lg-2.control-label(for='inputImage') Image
             .col-lg-10
               input#inputImage.form-control(type='text', name='image', value=body?body.image:panos.image, placeholder='Image of panorama')
+          - if (image_check.length > 0)
+            .form-group
+              .col-lg-offset-2.col-lg-10
+                - for (results in image_check)
+                  - for (result in image_check[results])
+                    .alert.alert-small(class='alert-'+result)= image_check[results][result]
           .form-group
             label.col-lg-2.control-label(for='inputNewImage') Upload New Image
             .col-lg-10
