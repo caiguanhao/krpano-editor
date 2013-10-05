@@ -42,7 +42,7 @@ exports.add = (client, req, next, callback) ->
     callback { error: err_msg }
     return
 
-  tour_id = client.incr 'tours:count', (err, id) ->
+  client.incr 'tours:count', (err, id) ->
     if err
       callback { error: err }
     else

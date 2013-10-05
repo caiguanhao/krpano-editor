@@ -19,7 +19,8 @@
     "less": "1.4.x",
     "jade": "0.35.x",
     "connect-assets": "2.5.x",
-    "redis": "0.8.x"
+    "redis": "0.8.x",
+    "gm": "1.13.x"
   },
   "devDependencies": {
     "supertest": "*",

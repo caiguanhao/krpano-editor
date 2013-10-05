@@ -36,5 +36,5 @@ html
       - while (message = messages.pop())
         - for (msg in message)
           - if (message[msg])
-            != 'toastr["' + msg + '"]("' + message[msg] + '");'
+            != 'toastr["' + msg + '"](unescape("' + escape(message[msg]) + '"));'
       != '</script>'

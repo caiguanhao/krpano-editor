@@ -9,7 +9,8 @@ client = redis.createClient()
 app.set 'port', process.env.PORT || 3000
 app.set 'view engine', 'jade'
 app.set 'views', __dirname + '/views'
-app.set 'tmp_upload_dir', './tmp/uploads'
+app.set 'tmp_upload_dir', __dirname + '/tmp/uploads'
+app.set 'upload_dir', __dirname + '/public/uploads'
 
 app.use express.logger('dev')
 app.use express.static(__dirname + '/public')

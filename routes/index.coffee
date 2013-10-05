@@ -57,6 +57,9 @@ module.exports = (app, client) ->
       res.render 'panoramas/new', { tours: tours }
 
   app.post '/tours/:tour_id/panoramas', (req, res, next) ->
-    panorama.add client, req, next, (status, tours) ->
+    panorama.add client, req, next, (status, tours, panos) ->
       req.session.messages.push status
-      res.render 'panoramas/new', { body: req.body, tours: tours }
+      if status.error
+        res.render 'panoramas/new', { body: req.body, tours: tours }
+      else
+        res.redirect '/tours/' + tours.id + '/panoramas/' + panos.id
