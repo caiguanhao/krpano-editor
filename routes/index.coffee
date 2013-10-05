@@ -89,6 +89,11 @@ module.exports = (app, client) ->
         next()
 
   app.post '/tours/:tour_id/panoramas/:pano_id', (req, res, next) ->
+    if req.body.make_thumbs
+      panorama.make_thumbs client, req, next, (status, tours, panos) ->
+        req.session.messages.push status
+        res.redirect '/tours/' + tours.id + '/panoramas/' + panos.id + '/edit'
+      return
     panorama.update client, req, next, (status, tours, panos) ->
       req.session.messages.push status
       if status.error

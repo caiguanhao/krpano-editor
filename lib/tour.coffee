@@ -1,3 +1,5 @@
+panorama = require './panorama'
+
 exports.list = (client, req, next, callback) ->
 
   tour_id = req.params.id
@@ -19,6 +21,7 @@ exports.list = (client, req, next, callback) ->
                 if err
                   callback { error: err }, tour
                 else if pano
+                  pano.thumb = panorama.thumbnail(pano.image, 250)
                   panos.push pano
                 count += 1
                 if count == num

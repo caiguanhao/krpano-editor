@@ -58,12 +58,27 @@ save_upload_image = (image_path, app, tour, pano, callback) ->
               if error then callback { error: error }, tour, pano; return
               callback {}, tour, pano, new_path.replace app.get('public_dir'), ''
 
+thumbnail = (path, thumb_size) ->
+  return '' if !path
+  path += '.' if !/\.[^\/]+?$/.test(path)
+  path = /^(.*)(\..*)$/.exec(path)
+  path[1] + '_' + thumb_size + 'px' + path[2].replace /\.$/, ''
+
+exports.thumbnail = thumbnail
+
+make_thumbnail = (image_path, callback) ->
+  gm(image_path).format (err, value) ->
+    if err or value != 'JPEG' then callback { error: err }; return
+    gm(image_path).resize(250, 125, '!').noProfile().quality(90).write thumbnail(image_path, 250), (error) ->
+      callback { error: err }
+
 image_check = (image_path, callback) ->
   if !image_path then callback []; return
   results = [
     { danger: "Not a valid JPEG." },
     { danger: "Invalid spherical panoramic image: aspect ratio is not 2:1." },
     { danger: "The resolution of the image is either too low or too high." },
+    { danger: "At least one thumbnail is missing." },
   ]
   gm(image_path).format (err, value) ->
     if err or value != 'JPEG' then callback results
@@ -75,7 +90,9 @@ image_check = (image_path, callback) ->
           results[1] = { success: "A valid spherical panoramic image with 2:1 aspect ratio." }
         if size.width >= 2000 and size.width <= 12000
           results[2] = { success: "The resolution of the image is neither too low nor too high." }
-        callback results
+        fs.exists thumbnail(image_path, 250), (exists) ->
+          if exists then results[3] = { success: "Thumbnails exist." }
+          callback results
 
 exports.image_check = image_check
 
@@ -133,7 +150,7 @@ exports.update = (client, req, next, callback) ->
       when pano_image.length > 256 then 'Image path is too long. (<=256)'
 
     path = ''
-    if req.files.new_image
+    if req.files and req.files.new_image
       path = req.files.new_image.path
       if req.files.new_image.size == 0
         fs.unlinkSync path
@@ -165,3 +182,14 @@ exports.delete = (client, req, next, callback) ->
     client.lrem 'panos', 0, pano_key
 
     callback { success: 'Successfully deleted a panorama.' }
+
+exports.make_thumbs = (client, req, next, callback) ->
+  pano_exists client, req, next, (status, tour, pano) ->
+    image = pano.image
+    if image
+      image = req.app.get('public_dir') + image
+      make_thumbnail image, (status) ->
+        if status.error then callback { error: status.error }, tour, pano; return
+        callback { success: 'Successfully generated thumbnails.' }, tour, pano
+    else
+      callback { warning: 'No need to generate thumbnails.' }, tour, pano

@@ -32,7 +32,7 @@ block content
             label.col-lg-2.control-label(for='inputImage') Image
             .col-lg-10
               input#inputImage.form-control(type='text', name='image', value=body?body.image:panos.image, placeholder='Image of panorama')
-          - if (image_check.length > 0)
+          - if (image_check && image_check.length > 0)
             .form-group
               .col-lg-offset-2.col-lg-10
                 - for (results in image_check)
@@ -45,3 +45,7 @@ block content
           .form-group
             .col-lg-offset-2.col-lg-10
               button.btn.btn-default(type='submit') Update Panorama
+        form.form-horizontal(role='form', action='/tours/'+tours.id+'/panoramas/'+panos.id, method='POST')
+          .form-group
+            .col-lg-offset-2.col-lg-10
+              button.btn.btn-default(type='submit', name='make_thumbs', value='yes') Regenerate Thumbnails

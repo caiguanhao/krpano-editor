@@ -21,22 +21,16 @@ block content
       a.btn.btn-primary(href='/tours/'+tours.id+'/panoramas/new')
         span.glyphicon.glyphicon-plus
         | Add Panoramas
-    table.table
-      thead
-        tr
-          th Name
-          th Image
-          th Description
-          th Created At
-      tbody
-        - for pano in panos
-          tr
-            td
-              a(href='/tours/'+tours.id+'/panoramas/'+pano.id)= pano.name
-              = ' ['
-              a(href='/tours/'+tours.id+'/panoramas/'+pano.id+'/edit') edit
-              | ]
-            td
-              a(href=pano.image) Image
-            td= pano.desc
-            td= pano.created_at
+    .row
+      - for pano in panos
+        .col-sm-6.col-md-3
+          .thumbnail
+            a(href='/tours/'+tours.id+'/panoramas/'+pano.id)
+              - if (pano.thumb)
+                img(alt=pano.name, src=pano.thumb)
+              - else
+                img(alt=pano.name, src='/images/blank_250px.png')
+            .caption
+              h4= pano.name
+              h6= pano.desc
+              em= pano.created_at
