@@ -10,7 +10,7 @@ module.exports = (app, client) ->
     res.render 'tours/new'
 
   app.get '/tours/:id?/(:action)?', (req, res, next) ->
-    tour.list client, req, next, (status, tours) ->
+    tour.list client, req, next, (status, tours, panos) ->
       if tours instanceof Array
         req.session.messages.push status
         res.render 'tours/list', { tours: tours || [] }
@@ -20,7 +20,7 @@ module.exports = (app, client) ->
           when 'edit', 'delete' then 'tours/' + req.params.action
         if view
           req.session.messages.push status
-          res.render view, { tours: tours }
+          res.render view, { tours: tours, panos: panos || [] }
         else
           next()
       else
@@ -63,3 +63,8 @@ module.exports = (app, client) ->
         res.render 'panoramas/new', { body: req.body, tours: tours }
       else
         res.redirect '/tours/' + tours.id + '/panoramas/' + panos.id
+
+  app.get '/tours/:tour_id/panoramas/:pano_id', (req, res, next) ->
+    panorama.pano_exists client, req, next, (status, tours, panos) ->
+      req.session.messages.push status
+      res.render 'panoramas/show', { tours: tours, panos: panos }

@@ -9,7 +9,19 @@ exports.list = (client, req, next, callback) ->
         next()
         return
       client.hgetall key, (err, tour) ->
-        callback { error: err }, tour
+        client.scard key + ':panos', (err, num) ->
+          if err or num == 0 then callback { error: err }, tour; return
+          panos = []
+          client.smembers key + ':panos', (err, members) ->
+            members.forEach (member) ->
+              client.hgetall member, (err, pano) ->
+                if err
+                  callback { error: err }, tour
+                else
+                  panos.push pano
+
+                if panos.length == num
+                  callback { error: err }, tour, panos
     return
 
   client.lrange 'tours', 0, -1, (err, _tours) ->

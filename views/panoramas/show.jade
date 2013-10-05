@@ -1,0 +1,17 @@
+block variables
+  title = panos.name + " - " + tours.name
+
+extends ../layout
+
+block content
+  article.container(role='main')
+    ol.breadcrumb
+      li
+        a(href='/') Home
+      li
+        a(href='/tours') Tours
+      li
+        a(href='/tours/'+tours.id)= tours.name
+      li.active= panos.name
+    h2= panos.name
+    h5= panos.desc

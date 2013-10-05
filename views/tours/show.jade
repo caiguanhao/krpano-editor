@@ -29,5 +29,14 @@ block content
           th Description
           th Created At
       tbody
-        tr
-          td
+        - for pano in panos
+          tr
+            td
+              a(href='/tours/'+tours.id+'/panoramas/'+pano.id)= pano.name
+              = ' ['
+              a(href='/tours/'+tours.id+'/panoramas/'+pano.id+'/edit') edit
+              | ]
+            td
+              a(href=pano.image) Image
+            td= pano.desc
+            td= pano.created_at

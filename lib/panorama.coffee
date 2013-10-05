@@ -11,6 +11,26 @@ tour_exists = (client, req, next, callback) ->
 
 exports.tour_exists = tour_exists
 
+pano_exists = (client, req, next, callback) ->
+  tour_id = req.params.tour_id
+  pano_id = req.params.pano_id
+  if !tour_id or !pano_id then next(); return
+  tour_key = 'tours:' + tour_id
+  pano_key = 'panos:' + pano_id
+  client.exists tour_key, (err, exists) ->
+    if err or exists == 0 then next(); return
+    client.exists pano_key, (err, exists) ->
+      if err or exists == 0 then next(); return
+      client.exists tour_key + ':panos', (err, exists) ->
+        if err or exists == 0 then next(); return
+        client.sismember tour_key + ':panos', pano_key, (err, ismember) ->
+          if err or ismember == 0 then next(); return
+          client.hgetall tour_key, (err, tour) ->
+            client.hgetall pano_key, (err, pano) ->
+              callback { error: err }, tour, pano
+
+exports.pano_exists = pano_exists
+
 save_upload_image = (image_path, upload_dir, tour, callback) ->
   gm = require 'gm'
   gm(image_path).format (err, value) ->
@@ -63,7 +83,7 @@ exports.add = (client, req, next, callback) ->
         tour_key = 'tours:' + tour.id
         pano_key = 'panos:' + id
         client.lpush 'panos', pano_key
-        client.lpush tour_key + ':panos', pano_key
+        client.sadd tour_key + ':panos', pano_key
         client.hmset pano_key,
           id: id
           created_at: Math.round(Date.now() / 1000)
