@@ -15,21 +15,21 @@ block content
         a(href='/tours/'+tours.id+'/delete') Delete
       li.pull-right
         a(href='/tours/'+tours.id+'/edit') Edit
-    h2= tours.name
-    h5= tours.desc
-    .text-right
+    .pull-right
       a.btn.btn-primary(href='/tours/'+tours.id+'/panoramas/new')
         span.glyphicon.glyphicon-plus
-        | Add Panoramas
+        = ' Add Panoramas'
+    h2= tours.name
+    h5= tours.desc
     .row
       - for pano in panos
         .col-sm-6.col-md-3
           .thumbnail
             a(href='/tours/'+tours.id+'/panoramas/'+pano.id)
               - if (pano.thumb)
-                img(alt=pano.name, src=pano.thumb)
+                img.thumbnail(alt=pano.name, src=pano.thumb)
               - else
-                img(alt=pano.name, src='/images/blank_250px.png')
+                img.thumbnail(alt=pano.name, src='/images/blank_250px.png')
             .caption
               h4= pano.name
               h6= pano.desc
