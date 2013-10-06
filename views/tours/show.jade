@@ -31,7 +31,10 @@ block content
               - else
                 img.thumbnail(alt=pano.name, src='/images/blank_250px.png')
             .caption
-              h4= pano.name
+              h4
+                = pano.name + ' '
+                - if (pano.entry)
+                  small.glyphicon.glyphicon-home
               h6= pano.desc
               - var created_at = new Date(parseInt(pano.created_at+'000'))
               abbr.timeago(title=created_at.toISOString())= created_at

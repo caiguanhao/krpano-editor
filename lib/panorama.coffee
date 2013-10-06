@@ -28,7 +28,9 @@ pano_exists = (client, req, next, callback) ->
           if err or ismember == 0 then next(); return
           client.hgetall tour_key, (err, tour) ->
             client.hgetall pano_key, (err, pano) ->
-              callback { error: err }, tour, pano
+              client.get tour_key + ':entry', (err, entry) ->
+                if entry == pano_key then pano.entry = true
+                callback { error: err }, tour, pano
 
 exports.pano_exists = pano_exists
 
@@ -142,6 +144,7 @@ exports.update = (client, req, next, callback) ->
     pano_name = if req.body.name then req.body.name.trim() else ''
     pano_desc = if req.body.desc then req.body.desc.trim() else ''
     pano_image = if req.body.image then req.body.image.trim() else ''
+    tour_entry = req.body.entry && req.body.entry == 'yes'
 
     err_msg = switch true
       when pano_name.length == 0 then 'Name must not be empty.'
@@ -162,16 +165,24 @@ exports.update = (client, req, next, callback) ->
 
     save_upload_image path, req.app, tour, pano, (status, tour, pano, new_path) ->
       if new_path and new_path.length > 0 then pano_image = new_path
-      if pano_name == pano.name and pano_desc == pano.desc and pano_image == pano.image
-        callback { warning: 'Nothing changes.' }, tour, pano
-      else
-        pano_key = 'panos:' + pano.id
-        client.hmset pano_key,
-          name: pano_name
-          desc: pano_desc
-          image: pano_image
+      tour_entry_key = 'tours:' + tour.id + ':entry'
+      pano_key = 'panos:' + pano.id
+      client.get tour_entry_key, (err, old_tour_entry) ->
+        new_tour_entry = if tour_entry then pano_key
+        else if old_tour_entry != pano_key then old_tour_entry
+        else ''
 
-        callback { success: 'Successfully updated a panorama.' }, tour, pano
+        if pano_name == pano.name and pano_desc == pano.desc and pano_image == pano.image and old_tour_entry == new_tour_entry
+          callback { warning: 'Nothing changes.' }, tour, pano
+        else
+          client.set tour_entry_key, new_tour_entry
+
+          client.hmset pano_key,
+            name: pano_name
+            desc: pano_desc
+            image: pano_image
+
+          callback { success: 'Successfully updated a panorama.' }, tour, pano
 
 exports.delete = (client, req, next, callback) ->
   pano_exists client, req, next, (status, tour, pano) ->

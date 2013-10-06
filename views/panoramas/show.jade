@@ -17,7 +17,10 @@ block content
         a(href='/tours/'+tours.id+'/panoramas/'+panos.id+'/delete') Delete
       li.pull-right
         a(href='/tours/'+tours.id+'/panoramas/'+panos.id+'/edit') Edit
-    h2= panos.name
+    h2
+      = panos.name + ' '
+      - if (panos.entry)
+        small.glyphicon.glyphicon-home
     h5= panos.desc
     - if (panos.image)
       #pano

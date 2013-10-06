@@ -29,6 +29,15 @@ block content
             .col-lg-10
               input#inputDesc.form-control(type='text', name='desc', value=body?body.desc:panos.desc, placeholder='Description of panorama')
           .form-group
+            label.col-lg-2.control-label Flags
+            .col-lg-10
+              - checked = body ? (body.entry == 'yes' ? '' : undefined) : (panos.entry ? '' : undefined)
+              input#chkboxEntry(type='checkbox', name='entry', value='yes', checked=checked)
+              label.control-label(for='chkboxEntry')
+                &nbsp;
+                span.glyphicon.glyphicon-home
+                &nbsp;Home
+          .form-group
             label.col-lg-2.control-label(for='inputImage') Image
             .col-lg-10
               input#inputImage.form-control(type='text', name='image', value=body?body.image:panos.image, placeholder='Image of panorama')
