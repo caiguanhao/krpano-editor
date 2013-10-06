@@ -13,19 +13,21 @@ exports.list = (client, req, next, callback) ->
       client.hgetall key, (err, tour) ->
         client.scard key + ':panos', (err, num) ->
           if err or num == 0 then callback { error: err }, tour; return
-          panos = []
-          client.smembers key + ':panos', (err, members) ->
-            count = 0
-            members.forEach (member) ->
-              client.hgetall member, (err, pano) ->
-                client.get key + ':entry', (err, entry) ->
-                  if pano
-                    pano.thumb = panorama.thumbnail(pano.image, 250)
-                    pano.entry = entry == 'panos:' + pano.id
-                    panos.push pano
-                  count += 1
-                  if count == num
-                    callback { error: err }, tour, panos
+          client.get key + ':entry', (err, entry) ->
+            client.sismember key + ':panos', entry, (err, ismember) ->
+              tour.has_entry = ismember == 1
+              panos = []
+              client.smembers key + ':panos', (err, members) ->
+                count = 0
+                members.forEach (member) ->
+                  client.hgetall member, (err, pano) ->
+                    if pano
+                      pano.thumb = panorama.thumbnail(pano.image, 250)
+                      pano.entry = entry == 'panos:' + pano.id
+                      panos.push pano
+                    count += 1
+                    if count == num
+                      callback { error: err }, tour, panos
     return
 
   client.lrange 'tours', 0, -1, (err, _tours) ->
