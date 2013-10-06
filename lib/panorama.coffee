@@ -161,7 +161,7 @@ exports.update = (client, req, next, callback) ->
       return
 
     save_upload_image path, req.app, tour, pano, (status, tour, pano, new_path) ->
-      pano_image = new_path
+      if new_path and new_path.length > 0 then pano_image = new_path
       if pano_name == pano.name and pano_desc == pano.desc and pano_image == pano.image
         callback { warning: 'Nothing changes.' }, tour, pano
       else

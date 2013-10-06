@@ -33,4 +33,5 @@ block content
             .caption
               h4= pano.name
               h6= pano.desc
-              em= pano.created_at
+              - var created_at = new Date(parseInt(pano.created_at+'000'))
+              abbr.timeago(title=created_at.toISOString())= created_at
