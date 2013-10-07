@@ -1,0 +1,13 @@
+!!! xml
+krpano(version='1.16' onstart='startup();')
+  view(hlookat='0' vlookat='0' fovtype='VFOV' fov='70' fovmin='30' fovmax='100')
+  display(movequality10='BEST' stillquality10='BEST')
+  action(name='startup')
+    - if (tours.has_entry)
+      | loadscene('#{tours.entry.replace(':','')}', null, MERGE);
+    - else
+      | loadscene(get(scene[0].name), null, MERGE);
+  - for pano in panos
+    scene(heading='', lat='', lng='', name='panos'+pano.id, onstart='', thumburl='', title='02')
+      image
+        sphere(url=pano.image)

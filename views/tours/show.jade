@@ -53,4 +53,6 @@ block content
     - else if (view == 'graph')
       p Pending
     - else
-      p Pending
+      #pano
+      script.
+        embedpano({ swf: '/swf/krpano.swf', xml: '/tours/!{tours.id}.xml', target: 'pano', html5: 'auto' });

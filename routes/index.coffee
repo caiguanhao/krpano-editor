@@ -9,6 +9,10 @@ module.exports = (app, client) ->
   app.get '/tours/new', (req, res) ->
     res.render 'tours/new'
 
+  app.get '/tours/:id.xml', (req, res, next) ->
+    tour.list client, req, next, (status, tours, panos) ->
+      res.render 'xml/tour', { tours: tours, panos: panos || [] }
+
   app.get '/tours/:id?/(:action)?', (req, res, next) ->
     tour.list client, req, next, (status, tours, panos) ->
       if tours instanceof Array

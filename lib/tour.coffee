@@ -14,6 +14,7 @@ exports.list = (client, req, next, callback) ->
         client.scard key + ':panos', (err, num) ->
           if err or num == 0 then callback { error: err }, tour; return
           client.get key + ':entry', (err, entry) ->
+            tour.entry = entry
             client.sismember key + ':panos', entry, (err, ismember) ->
               tour.has_entry = ismember == 1
               panos = []
