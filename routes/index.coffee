@@ -20,7 +20,7 @@ module.exports = (app, client) ->
           when 'edit', 'delete' then 'tours/' + req.params.action
         if view
           req.session.messages.push status
-          res.render view, { tours: tours, panos: panos || [] }
+          res.render view, { tours: tours, panos: panos || [], view: req.session.tour_view || 'tour' }
         else
           next()
       else

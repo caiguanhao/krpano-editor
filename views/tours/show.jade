@@ -25,20 +25,32 @@ block content
         = ' Add Panoramas'
     h2= tours.name
     h5= tours.desc
-    .row
-      - for pano in panos
-        .col-sm-6.col-md-3
-          .thumbnail
-            a(href='/tours/'+tours.id+'/panoramas/'+pano.id)
-              - if (pano.thumb)
-                img.thumbnail(alt=pano.name, src=pano.thumb)
-              - else
-                img.thumbnail(alt=pano.name, src='/images/blank_250px.png')
-            .caption
-              h4
-                = pano.name + ' '
-                - if (pano.entry)
-                  small.glyphicon.glyphicon-home
-              h6= pano.desc
-              - var created_at = new Date(parseInt(pano.created_at+'000'))
-              abbr.timeago(title=created_at.toISOString())= created_at
+    ul#tour-nav.nav.nav-tabs.nav-justified
+      li(class=view=='tour'?'active':undefined)
+        a(href='/tours/'+tours.id+'?view=tour') Tour
+      li(class=view=='list'?'active':undefined)
+        a(href='/tours/'+tours.id+'?view=list') List
+      li(class=view=='graph'?'active':undefined)
+        a(href='/tours/'+tours.id+'?view=graph') Graph
+    - if (view == 'list')
+      .row
+        - for pano in panos
+          .col-sm-6.col-md-3
+            .thumbnail
+              a(href='/tours/'+tours.id+'/panoramas/'+pano.id)
+                - if (pano.thumb)
+                  img.thumbnail(alt=pano.name, src=pano.thumb)
+                - else
+                  img.thumbnail(alt=pano.name, src='/images/blank_250px.png')
+              .caption
+                h4
+                  = pano.name + ' '
+                  - if (pano.entry)
+                    small.glyphicon.glyphicon-home
+                h6= pano.desc
+                - var created_at = new Date(parseInt(pano.created_at+'000'))
+                abbr.timeago(title=created_at.toISOString())= created_at
+    - else if (view == 'graph')
+      p Pending
+    - else
+      p Pending

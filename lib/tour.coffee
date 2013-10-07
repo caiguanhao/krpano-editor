@@ -28,6 +28,9 @@ exports.list = (client, req, next, callback) ->
                     count += 1
                     if count == num
                       callback { error: err }, tour, panos
+      if req.query.view
+        req.session.tour_view = switch req.query.view
+          when 'tour', 'list', 'graph' then req.query.view
     return
 
   client.lrange 'tours', 0, -1, (err, _tours) ->
