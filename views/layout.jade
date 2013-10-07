@@ -32,12 +32,13 @@ html
                   a(href='/tours/new') Create
     block content
     - if (messages && messages.length > 0)
-      != '<script>'
+      - var msgs = ''
       - while (message = messages.pop())
         - for (msg in message)
           - if (message[msg])
-            != 'toastr["' + msg + '"](unescape("' + escape(message[msg]) + '"));'
-      != '</script>'
+            - msgs += 'toastr["' + msg + '"](unescape("' + escape(message[msg]) + '"));'
+      - if (msgs)
+        != '<script>' + msgs + '</script>'
     footer
       .container
         .footer
