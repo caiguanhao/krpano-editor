@@ -23,7 +23,7 @@ jQuery ($) ->
         window.clearInterval window.hotspot.interval
 
     $('#pano-selector').on 'show.bs.modal', ->
-      $.getJSON '/tours/' + tour_id + '.json', (json) ->
+      $.getJSON '/tours/' + tour_id, (json) ->
         $('#pano-list').empty()
         $.each json.panos, (a, b) ->
           item = $('<a class="thumbnail" href="#"><img alt="'+b.name+'" src="'+b.thumb+
@@ -46,7 +46,7 @@ jQuery ($) ->
 
   embedpano
     swf: "/swf/krpano.swf"
-    xml: "/tours/" + tour_id + ".xml"
+    xml: "/tours/" + tour_id
     target: "tour"
     html5: "auto"
     onready: pano_is_ready

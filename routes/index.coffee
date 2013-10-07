@@ -9,28 +9,25 @@ module.exports = (app, client) ->
   app.get '/tours/new', (req, res) ->
     res.render 'tours/new'
 
-  app.get '/tours/:id.json', (req, res, next) ->
-    tour.list client, req, next, (status, tours, panos) ->
-      res.send { tours: tours, panos: panos || [] }
-
-  app.get '/tours/:id.xml', (req, res, next) ->
-    tour.list client, req, next, (status, tours, panos) ->
-      res.render 'xml/tour', { tours: tours, panos: panos || [] }
-
-  app.get '/tours/:id?/(:action)?', (req, res, next) ->
+  app.get '/tours/:id?/:action?', (req, res, next) ->
     tour.list client, req, next, (status, tours, panos) ->
       if tours instanceof Array
         req.session.messages.push status
         res.render 'tours/list', { tours: tours || [] }
       else if tours
-        view = switch req.params.action
-          when undefined then 'tours/show'
-          when 'edit', 'delete' then 'tours/' + req.params.action
-        if view
-          req.session.messages.push status
-          res.render view, { tours: tours, panos: panos || [], view: req.session.tour_view || 'tour' }
-        else
-          next()
+        req.session.messages.push status
+        params = { tours: tours, panos: panos || [] }
+        switch req.params.action
+          when undefined
+            res.format
+              xml: -> res.render 'xml/tour', params
+              html: ->
+                params.view = req.session.tour_view || 'tour'
+                res.render 'tours/show', params
+              json: -> res.send params
+          when 'edit', 'delete'
+            res.render 'tours/' + req.params.action, params
+          else next()
       else
         req.session.messages.push { warning: 'No virutal tours.' }
         res.redirect '/'
