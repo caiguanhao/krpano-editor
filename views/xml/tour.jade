@@ -5,10 +5,10 @@ krpano(version='1.16' onstart='startup();')
   display(movequality10='BEST' stillquality10='BEST')
   action(name='startup')
     - if (tours.has_entry)
-      | loadscene('#{tours.entry.replace(':','')}', null, MERGE);
+      | loadscene('#{tours.entry}', null, MERGE);
     - else
       | loadscene(get(scene[0].name), null, MERGE);
   - for pano in panos
-    scene(heading='', lat='', lng='', name='panos'+pano.id, onstart='', thumburl='', title='02')
+    scene(heading='', lat='', lng='', pano-id='#{pano.id}', name='panos:#{pano.id}', onstart='', thumburl='', title='')
       image
         sphere(url=pano.image)
