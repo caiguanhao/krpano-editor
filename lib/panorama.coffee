@@ -29,6 +29,7 @@ pano_exists = (client, req, next, callback) ->
           client.hgetall tour_key, (err, tour) ->
             client.hgetall pano_key, (err, pano) ->
               client.get tour_key + ':entry', (err, entry) ->
+                pano.thumb = thumbnail(pano.image, 250)
                 if entry == pano_key then pano.entry = true
                 callback { error: err }, tour, pano
 

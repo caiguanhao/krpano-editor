@@ -1,5 +1,17 @@
 jQuery ($) ->
+  window.pano_sync = (pano_id) ->
+    window.pano_id = pano_id
+    location = '/tours/' + tour_id + '/panoramas/' + pano_id
+    $.getJSON location, (json) ->
+      pCS = $('#panelCurrentScene').removeClass('hide')
+      pCS.find('.pano-link').attr('href', location)
+      pCS.find('.pano-img').attr('src', json.panos.thumb)
+      pCS.find('.pano-name').text(json.panos.name)
+      pCS.find('.pano-desc').text(json.panos.desc)
+
   pano_is_ready = (krpano) ->
+    krpano.set 'events.onloadcomplete', 'js(pano_sync(get(scene[get(xml.scene)].pano-id)))'
+
     window.hotspot =
       interval: null
       ondown: (hotspot) ->

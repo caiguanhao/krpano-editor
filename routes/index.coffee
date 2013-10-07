@@ -72,29 +72,23 @@ module.exports = (app, client) ->
       else
         res.redirect '/tours/' + tours.id + '/panoramas/' + panos.id
 
-  app.get '/tours/:tour_id/panoramas/:pano_id.xml', (req, res, next) ->
-    panorama.pano_exists client, req, next, (status, tours, panos) ->
-      res.render 'xml/pano', { tours: tours, panos: panos }
-
   app.get '/tours/:tour_id/panoramas/:pano_id/:action?', (req, res, next) ->
     panorama.pano_exists client, req, next, (status, tours, panos) ->
-      view = switch req.params.action
-        when undefined then 'panoramas/show'
-        when 'edit', 'delete' then 'panoramas/' + req.params.action
-      if view
-        req.session.messages.push status
-
-        params = { tours: tours, panos: panos }
-        switch req.params.action
-          when 'edit'
-            path = if panos.image then req.app.get('public_dir') + panos.image else ''
-            panorama.image_check path, (results) ->
-              params['image_check'] = results
-              res.render view, params
-          else
-            res.render view, params
-      else
-        next()
+      req.session.messages.push status
+      params = { tours: tours, panos: panos }
+      switch req.params.action
+        when undefined
+          res.format
+            xml: -> res.render 'xml/pano', params
+            html: -> res.render 'panoramas/show', params
+            json: -> res.send params
+        when 'edit'
+          path = if panos.image then req.app.get('public_dir') + panos.image else ''
+          panorama.image_check path, (results) ->
+            params['image_check'] = results
+            res.render 'panoramas/edit', params
+        when 'delete' then res.render 'panoramas/delete', params
+        else next()
 
   app.post '/tours/:tour_id/panoramas/:pano_id', (req, res, next) ->
     if req.body.make_thumbs

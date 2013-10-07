@@ -53,9 +53,24 @@ block content
     - else if (view == 'graph')
       p Pending
     - else
-      #tour
-      .button-group
-        button#btnAddHotspot.btn.btn-default(type='button') Add Hotspot
+      .row
+        .col-md-8
+          #tour
+        .col-md-4
+          #panelCurrentScene.panel.panel-default.hide
+            .panel-heading Current Scene
+            .panel-body
+              .media
+                a.pano-link.pull-left(href='#')
+                  img.pano-img.media-object(src='')
+                .media-body
+                  h4.pano-name.media-heading
+                  p.pano-desc
+          .panel.panel-default
+            .panel-heading Toolbox
+            .panel-body
+              .button-group
+                button#btnAddHotspot.btn.btn-default(type='button') Add Hotspot
       script.
         var tour_id = !{tours.id};
       != js('editor')
