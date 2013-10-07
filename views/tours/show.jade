@@ -53,6 +53,9 @@ block content
     - else if (view == 'graph')
       p Pending
     - else
-      #pano
+      #tour
+      .button-group
+        button#btnAddHotspot.btn.btn-default(type='button') Add Hotspot
       script.
-        embedpano({ swf: '/swf/krpano.swf', xml: '/tours/!{tours.id}.xml', target: 'pano', html5: 'auto' });
+        embedpano({ swf: '/swf/krpano.swf', xml: '/tours/!{tours.id}.xml', target: 'tour', html5: 'auto' });
+      != js('editor')
