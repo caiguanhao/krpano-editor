@@ -57,5 +57,17 @@ block content
       .button-group
         button#btnAddHotspot.btn.btn-default(type='button') Add Hotspot
       script.
-        embedpano({ swf: '/swf/krpano.swf', xml: '/tours/!{tours.id}.xml', target: 'tour', html5: 'auto' });
+        var tour_id = !{tours.id};
       != js('editor')
+
+    #pano-selector.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+            h4.modal-title Connect to Next Scene
+          .modal-body
+            #pano-list.row
+          .modal-footer
+            button.btn.btn-default(type='button', data-dismiss='modal') Close
+            button#linkToPano.btn.btn-primary(type='button', disabled) Link to This Panorama
