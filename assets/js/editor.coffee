@@ -37,22 +37,28 @@ jQuery ($) ->
             $('#pano-list').find('a.thumbnail').not(this).removeClass('active')
             $('#linkToPano').prop('disabled', $('#pano-list').find('a.thumbnail.active').length != 1)
           $('<div class="col-sm-6 col-md-4" />').append(item).appendTo('#pano-list')
-      $('#linkToPano').click (e) ->
-        path = window.pano_path
-        return if !path
-        to_id = $('#pano-list').find('a.thumbnail.active:first').data('id')
-        hotspot = 'hotspot1'
-        ath = krpano.get 'hotspot['+hotspot+'].ath'
-        atv = krpano.get 'hotspot['+hotspot+'].atv'
-        $.post path + '/connect', { to: to_id, ath: ath, atv: atv }, (res) ->
-          $('#pano-selector').modal('hide')
-          $.each res, (a, b) -> toastr[a](b)
+
+    $('#linkToPano').click (e) ->
+      path = window.pano_path
+      return if !path
+      to_id = $('#pano-list').find('a.thumbnail.active:first').data('id')
+      hotspot = 'hotspot1'
+      ath = krpano.get 'hotspot['+hotspot+'].ath'
+      atv = krpano.get 'hotspot['+hotspot+'].atv'
+      $.post path + '/connect', { to: to_id, ath: ath, atv: atv }, (res) ->
+        $('#pano-selector').modal('hide')
+        $.each res, (a, b) -> toastr[a](b)
 
     $('#btnAddHotspot').click (e) ->
       krpano.call 'addhotspot(hotspot1)'
       krpano.call 'hotspot[hotspot1].loadstyle(hotspotstyle_01)'
       krpano.set 'hotspot[hotspot1].ondown', 'js(hotspot.ondown(hotspot1))'
       krpano.set 'hotspot[hotspot1].onup', 'js(hotspot.onup(hotspot1))'
+
+    $('#btnReload').click (e) ->
+      $('#panelCurrentScene').addClass('hide')
+      path = '/tours/'+tour_id+'?'+Math.random()
+      krpano.call "loadpano('"+path+"', null, REMOVESCENES | IGNOREKEEP, BLEND(1))"
 
   embedpano
     swf: "/swf/krpano.swf"
