@@ -1,10 +1,10 @@
 jQuery ($) ->
   window.pano_sync = (pano_id) ->
     window.pano_id = pano_id
-    location = '/tours/' + tour_id + '/panoramas/' + pano_id
-    $.getJSON location, (json) ->
+    window.pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
+    $.getJSON window.pano_path, (json) ->
       pCS = $('#panelCurrentScene').removeClass('hide')
-      pCS.find('.pano-link').attr('href', location)
+      pCS.find('.pano-link').attr('href', window.pano_path)
       pCS.find('.pano-img').attr('src', json.panos.thumb)
       pCS.find('.pano-name').text(json.panos.name)
       pCS.find('.pano-desc').text(json.panos.desc)
@@ -26,9 +26,11 @@ jQuery ($) ->
       $.getJSON '/tours/' + tour_id, (json) ->
         $('#pano-list').empty()
         $.each json.panos, (a, b) ->
+          return true if b.id == pano_id # continue if pano is current
           item = $('<a class="thumbnail" href="#"><img alt="'+b.name+'" src="'+b.thumb+
             '" class="thumbnail"><div class="caption"><h4>'+b.name+
               (if b.entry then ' <small class="glyphicon glyphicon-home"></small>' else '')+'</h4></div></a>')
+          item.data 'id', b.id
           item.click (e) ->
             e.preventDefault()
             $(this).toggleClass('active')
@@ -36,7 +38,15 @@ jQuery ($) ->
             $('#linkToPano').prop('disabled', $('#pano-list').find('a.thumbnail.active').length != 1)
           $('<div class="col-sm-6 col-md-4" />').append(item).appendTo('#pano-list')
       $('#linkToPano').click (e) ->
-        #$.post('/tours/' + tour_id + '/panoramas/link')
+        path = window.pano_path
+        return if !path
+        to_id = $('#pano-list').find('a.thumbnail.active:first').data('id')
+        hotspot = 'hotspot1'
+        ath = krpano.get 'hotspot['+hotspot+'].ath'
+        atv = krpano.get 'hotspot['+hotspot+'].atv'
+        $.post path + '/connect', { to: to_id, ath: ath, atv: atv }, (res) ->
+          $('#pano-selector').modal('hide')
+          $.each res, (a, b) -> toastr[a](b)
 
     $('#btnAddHotspot').click (e) ->
       krpano.call 'addhotspot(hotspot1)'

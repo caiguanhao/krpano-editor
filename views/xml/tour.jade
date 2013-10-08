@@ -12,3 +12,6 @@ krpano(version='1.16' onstart='startup();')
     scene(heading='', lat='', lng='', pano-id='#{pano.id}', name='panos:#{pano.id}', onstart='', thumburl='', title='')
       image
         sphere(url=pano.image)
+      - for conn in pano.connections
+        - conn = JSON.parse(conn)
+        hotspot(ath=conn.ath, atv=conn.atv, style="hotspotstyle_01")

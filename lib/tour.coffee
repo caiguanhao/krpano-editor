@@ -22,13 +22,16 @@ exports.list = (client, req, next, callback) ->
                 count = 0
                 members.forEach (member) ->
                   client.hgetall member, (err, pano) ->
-                    if pano
-                      pano.thumb = panorama.thumbnail(pano.image, 250)
-                      pano.entry = entry == 'panos:' + pano.id
-                      panos.push pano
-                    count += 1
-                    if count == num
-                      callback { error: err }, tour, panos
+                    pano_id = if pano then pano.id else ''
+                    client.smembers 'panos:' + pano_id + ':connections', (err, members) ->
+                      if pano
+                        pano.thumb = panorama.thumbnail(pano.image, 250)
+                        pano.entry = entry == 'panos:' + pano.id
+                        pano.connections = members
+                        panos.push pano
+                      count += 1
+                      if count == num
+                        callback { error: err }, tour, panos
       if req.query.view
         req.session.tour_view = switch req.query.view
           when 'tour', 'list', 'graph' then req.query.view

@@ -205,3 +205,22 @@ exports.make_thumbs = (client, req, next, callback) ->
         callback { success: 'Successfully generated thumbnails.' }, tour, pano
     else
       callback { warning: 'No need to generate thumbnails.' }, tour, pano
+
+exports.connect = (client, req, next, callback) ->
+  isNumber = (n) -> !isNaN(parseFloat(n)) && isFinite(n);
+  ath = req.body.ath
+  atv = req.body.atv
+  if !isNumber(ath) or !isNumber(atv) then next(); return
+  if ath > 180 or ath < -180 or atv > 90 or atv < -90 then next(); return
+  pano_exists client, req, next, (status, tour, pano) ->
+    if !req.body.to then next(); return
+    pano_key = 'panos:' + pano.id
+    to_pano_key = 'panos:' + req.body.to
+    client.exists to_pano_key, (err, exists) ->
+      if err or exists == 0 then next(); return
+      data =
+        ath: parseFloat(ath).toFixed(3)
+        atv: parseFloat(atv).toFixed(3)
+        to: to_pano_key
+      client.sadd pano_key + ':connections', JSON.stringify(data)
+      callback { success: 'Successfully connected two scenes.' }, tour, pano
