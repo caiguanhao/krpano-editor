@@ -54,6 +54,8 @@ jQuery ($) ->
       krpano.call 'hotspot[hotspot1].loadstyle(hotspotstyle_01)'
       krpano.set 'hotspot[hotspot1].ondown', 'js(hotspot.ondown(hotspot1))'
       krpano.set 'hotspot[hotspot1].onup', 'js(hotspot.onup(hotspot1))'
+      krpano.set 'hotspot[hotspot1].ath', krpano.get('view.hlookat')
+      krpano.set 'hotspot[hotspot1].atv', krpano.get('view.vlookat')
 
     $('#btnReload').click (e) ->
       $('#panelCurrentScene').addClass('hide')
