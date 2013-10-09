@@ -218,9 +218,17 @@ exports.connect = (client, req, next, callback) ->
     to_pano_key = 'panos:' + req.body.to
     client.exists to_pano_key, (err, exists) ->
       if err or exists == 0 then next(); return
+      ath = parseFloat ath
+      atv = parseFloat atv
       data =
-        ath: parseFloat(ath).toFixed(3)
-        atv: parseFloat(atv).toFixed(3)
+        ath: ath.toFixed(3)
+        atv: atv.toFixed(3)
         to: to_pano_key
       client.sadd pano_key + ':connections', JSON.stringify(data)
+      # antipode:
+      data =
+        ath: ((ath + 180) % 360).toFixed(3)
+        atv: (-1 * atv).toFixed(3)
+        to: pano_key
+      client.sadd to_pano_key + ':connections', JSON.stringify(data)
       callback { success: 'Successfully connected two scenes.' }, tour, pano
