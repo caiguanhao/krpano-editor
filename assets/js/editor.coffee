@@ -38,24 +38,25 @@ jQuery ($) ->
             $('#linkToPano').prop('disabled', $('#pano-list').find('a.thumbnail.active').length != 1)
           $('<div class="col-sm-6 col-md-4" />').append(item).appendTo('#pano-list')
 
+    hotspot_new = 'hotspot_new'
+
     $('#linkToPano').click (e) ->
       path = window.pano_path
       return if !path
       to_id = $('#pano-list').find('a.thumbnail.active:first').data('id')
-      hotspot = 'hotspot1'
-      ath = krpano.get 'hotspot['+hotspot+'].ath'
-      atv = krpano.get 'hotspot['+hotspot+'].atv'
+      ath = krpano.get 'hotspot['+hotspot_new+'].ath'
+      atv = krpano.get 'hotspot['+hotspot_new+'].atv'
       $.post path + '/connect', { to: to_id, ath: ath, atv: atv }, (res) ->
         $('#pano-selector').modal('hide')
         $.each res, (a, b) -> toastr[a](b)
 
     $('#btnAddHotspot').click (e) ->
-      krpano.call 'addhotspot(hotspot1)'
-      krpano.call 'hotspot[hotspot1].loadstyle(hotspotstyle_01)'
-      krpano.set 'hotspot[hotspot1].ondown', 'js(hotspot.ondown(hotspot1))'
-      krpano.set 'hotspot[hotspot1].onup', 'js(hotspot.onup(hotspot1))'
-      krpano.set 'hotspot[hotspot1].ath', krpano.get('view.hlookat')
-      krpano.set 'hotspot[hotspot1].atv', krpano.get('view.vlookat')
+      krpano.call 'addhotspot('+hotspot_new+')'
+      krpano.call 'hotspot['+hotspot_new+'].loadstyle(hotspotstyle_01)'
+      krpano.set 'hotspot['+hotspot_new+'].ondown', 'js(hotspot.ondown('+hotspot_new+'))'
+      krpano.set 'hotspot['+hotspot_new+'].onup', 'js(hotspot.onup('+hotspot_new+'))'
+      krpano.set 'hotspot['+hotspot_new+'].ath', krpano.get('view.hlookat')
+      krpano.set 'hotspot['+hotspot_new+'].atv', krpano.get('view.vlookat')
 
     $('#btnReload').click (e) ->
       $('#panelCurrentScene').addClass('hide')
