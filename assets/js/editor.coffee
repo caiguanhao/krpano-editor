@@ -24,6 +24,7 @@ jQuery ($) ->
           anchor.append('<span class="pull-right glyphicon glyphicon-check"></span>')
         anchor.data('scene', name)
         $('#panelCurrentScene .scenes').append($('<li />').append(anchor))
+    return
 
   window.hotspot_sync = (hotspot_name) ->
     return if !krpano
@@ -31,16 +32,22 @@ jQuery ($) ->
     to = /^panos:(\d+)$/.exec(to)
     return if !to
     pano_id = to[1]
-    pCH = $('#panelCurrentHotspot').addClass('hide')
+    pCH = $('#panelCurrentHotspot')
     find_pano pano_id, pCH, ->
       $('#btnRemoveHotspot').data('hotspot', hotspot_name)
       pCH.find('.hotspot-name').text(': ' + hotspot_name)
       pCH.removeClass('hide')
+    return
+
+  window.pano_click = (s) ->
+    $('#panelCurrentHotspot').addClass('hide')
+    return
 
   pano_is_ready = (krpano) ->
     window.krpano = krpano
 
     krpano.set 'events.onloadcomplete', 'js(pano_sync(get(scene[get(xml.scene)].pano-id)))'
+    krpano.set 'events.onclick', 'js(pano_click(s))'
 
     window.hotspot =
       interval: null
@@ -48,11 +55,13 @@ jQuery ($) ->
         window.hotspot.interval = window.setInterval ->
           krpano.call 'screentosphere(mouse.x, mouse.y, hotspot['+hotspot+'].ath, hotspot['+hotspot+'].atv)'
         , 30
+        return
       onup: (hotspot) ->
         fov = krpano.get 'view.fov'
         krpano.call 'looktohotspot('+hotspot+', '+fov+')'
         $('#pano-selector').modal('show')
         window.clearInterval window.hotspot.interval
+        return
 
     $('#pano-selector').on 'show.bs.modal', ->
       $.getJSON '/tours/' + tour_id, (json) ->
