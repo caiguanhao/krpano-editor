@@ -26,6 +26,7 @@ jQuery ($) ->
           anchor.append('<span class="pull-right glyphicon glyphicon-check"></span>')
         anchor.data('scene', name)
         $('#panelCurrentScene .scenes').append($('<li />').append(anchor))
+        hotspot_panel_return_default()
         hotspot_sync()
     return
 
@@ -39,6 +40,8 @@ jQuery ($) ->
       $('#btnAddHotspot').prop('disabled', false)
       hotspot_count = krpano.get 'hotspot.count'
       $('#panelCurrentHotspot .hotspots').empty()
+      if hotspot_count == 0
+        $('#panelCurrentHotspot .hotspots').append('<li><a class="select-hotspot" href="#">No hotspots.</a></li>')
       for i in [0...hotspot_count]
         name = krpano.get 'hotspot['+i+'].name'
         anchor = $('<a class="select-hotspot" href="#">'+name+'</a>')
@@ -62,11 +65,15 @@ jQuery ($) ->
 
     return
 
-  window.pano_click = (s) ->
+  hotspot_panel_return_default = ->
     pCH = $('#panelCurrentHotspot')
     pCH.find('.pano-img').attr 'src', (i, attr) -> $(this).data('default')
     pCH.find('.hotspot-name').text (i, text) -> $(this).data('default')
+    pCH.find('.pano-link').attr 'href', (i, attr) -> $(this).data('default')
     $('#btnRemoveHotspot').prop('disabled', true)
+
+  window.pano_click = (s) ->
+    hotspot_panel_return_default()
     return
 
   pano_is_ready = (krpano) ->
@@ -116,6 +123,7 @@ jQuery ($) ->
       $.post path + '/connect', { to: to_id, ath: ath, atv: atv }, (res) ->
         $('#pano-selector').modal('hide')
         $.each res, (a, b) -> toastr[a](b)
+        $('#btnReload').trigger('click')
 
     $('#btnRemoveHotspot').click (e) ->
       pano_id = window.pano_id
@@ -129,6 +137,7 @@ jQuery ($) ->
         data: { to: to }
       .done (res) ->
         $.each res, (a, b) -> toastr[a](b)
+        $('#btnReload').trigger('click')
 
     $('#btnAddHotspot').click (e) ->
       krpano.call 'addhotspot('+hotspot_new+')'
@@ -150,11 +159,15 @@ jQuery ($) ->
       krpano.call "loadpano('"+path+"', null, REMOVESCENES | IGNOREKEEP, BLEND(1))"
       toastr['success'] 'Tour reloaded.'
 
-    $(document).on 'click', '.select-scene', ->
+    $(document).on 'click', '.select-scene', (e) ->
+      e.preventDefault()
       krpano.call 'loadscene('+$(this).data('scene')+')'
 
-    $(document).on 'click', '.select-hotspot', ->
-      hotspot_sync $(this).data('hotspot')
+    $(document).on 'click', '.select-hotspot', (e) ->
+      e.preventDefault()
+      hotspot = $(this).data('hotspot')
+      return if !hotspot
+      hotspot_sync hotspot
 
   embedpano
     swf: "/swf/krpano.swf"
