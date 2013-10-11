@@ -10,8 +10,10 @@ jQuery ($) ->
 
   window.pano_sync = (pano_id) ->
     pCS = $('#panelCurrentScene')
+    pCH = $('#panelCurrentHotspot')
     find_pano pano_id, pCS, (pano_path) ->
       pCS.removeClass('hide')
+      pCH.removeClass('hide')
       window.pano_id = pano_id
       window.pano_path = pano_path
       scene_count = krpano.get 'scene.count'
@@ -24,23 +26,47 @@ jQuery ($) ->
           anchor.append('<span class="pull-right glyphicon glyphicon-check"></span>')
         anchor.data('scene', name)
         $('#panelCurrentScene .scenes').append($('<li />').append(anchor))
+        hotspot_sync()
     return
 
   window.hotspot_sync = (hotspot_name) ->
     return if !krpano
-    to = krpano.get 'hotspot['+hotspot_name+'].to'
-    to = /^panos:(\d+)$/.exec(to)
-    return if !to
-    pano_id = to[1]
+
     pCH = $('#panelCurrentHotspot')
-    find_pano pano_id, pCH, ->
-      $('#btnRemoveHotspot').data('hotspot', hotspot_name)
-      pCH.find('.hotspot-name').text(': ' + hotspot_name)
+    list_hotspots = ->
       pCH.removeClass('hide')
+      pCH.find('.current-hotspot').removeClass('hide')
+      $('#btnAddHotspot').prop('disabled', false)
+      hotspot_count = krpano.get 'hotspot.count'
+      $('#panelCurrentHotspot .hotspots').empty()
+      for i in [0...hotspot_count]
+        name = krpano.get 'hotspot['+i+'].name'
+        anchor = $('<a class="select-hotspot" href="#">'+name+'</a>')
+        anchor.data('hotspot', name)
+        $('#panelCurrentHotspot .hotspots').append($('<li />').append(anchor))
+
+    if hotspot_name
+      to = krpano.get 'hotspot['+hotspot_name+'].to'
+      to = /^panos:(\d+)$/.exec(to)
+      return if !to
+      pano_id = to[1]
+      find_pano pano_id, pCH, ->
+        $('#btnRemoveHotspot').data('hotspot', hotspot_name)
+        pCH.find('.hotspot-name').text(hotspot_name)
+        $('#btnRemoveHotspot').prop('disabled', false)
+        fov = krpano.get 'view.fov'
+        krpano.call 'looktohotspot('+hotspot_name+', '+fov+')'
+        list_hotspots()
+    else
+      list_hotspots()
+
     return
 
   window.pano_click = (s) ->
-    $('#panelCurrentHotspot').addClass('hide')
+    pCH = $('#panelCurrentHotspot')
+    pCH.find('.pano-img').attr 'src', (i, attr) -> $(this).data('default')
+    pCH.find('.hotspot-name').text (i, text) -> $(this).data('default')
+    $('#btnRemoveHotspot').prop('disabled', true)
     return
 
   pano_is_ready = (krpano) ->
@@ -102,7 +128,6 @@ jQuery ($) ->
         type: 'DELETE'
         data: { to: to }
       .done (res) ->
-        $('#panelCurrentHotspot').addClass('hide')
         $.each res, (a, b) -> toastr[a](b)
 
     $('#btnAddHotspot').click (e) ->
@@ -127,6 +152,9 @@ jQuery ($) ->
 
     $(document).on 'click', '.select-scene', ->
       krpano.call 'loadscene('+$(this).data('scene')+')'
+
+    $(document).on 'click', '.select-hotspot', ->
+      hotspot_sync $(this).data('hotspot')
 
   embedpano
     swf: "/swf/krpano.swf"

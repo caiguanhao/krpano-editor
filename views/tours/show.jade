@@ -61,31 +61,37 @@ block content
             .panel-heading Current Scene
             .panel-body
               a.pano-link.pull-left(href='#')
-                img.pano-img(src='')
-              .btn-group.scene-selector
+                img.pano-img(src='/images/scene.png')
+              .btn-group.selector
                 button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown')
                   span.pano-name
                   &nbsp;&nbsp;&nbsp;
                   span.caret
                 ul.scenes.dropdown-menu(role='menu')
           #panelCurrentHotspot.panel.panel-default.hide
-            .panel-heading
-              | Current Hotspot
-              span.hotspot-name
+            .panel-heading Hotspots
             .panel-body
-              .media
+              .current-hotspot.hide
                 a.pano-link.pull-left(href='#')
-                  img.pano-img.media-object(src='')
-                .media-body
-                  h4.pano-name.media-heading
-                  p.pano-desc
+                  img.pano-img(data-default='/images/hotspot.png', src='/images/hotspot.png')
+                .btn-group.selector
+                  button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown')
+                    span.hotspot-name(data-default='Hotspot...') Hotspot...
+                    &nbsp;&nbsp;&nbsp;
+                    span.caret
+                  ul.hotspots.dropdown-menu(role='menu')
+                .clearfix
               .btn-group
-                button#btnRemoveHotspot.btn.btn-default(type='button') Remove Hotspot
+                button#btnAddHotspot.btn.btn-default(type='button', disabled)
+                  span.glyphicon.glyphicon-plus
+                  | &nbsp;Add Hotspot
+                button#btnRemoveHotspot.btn.btn-default(type='button', disabled)
+                  span.glyphicon.glyphicon-trash
+                  | &nbsp;Remove
           .panel.panel-default
             .panel-heading Toolbox
             .panel-body
               .btn-group
-                button#btnAddHotspot.btn.btn-default(type='button') Add Hotspot
                 button#btnReload.btn.btn-default(type='button') Reload
       script.
         var tour_id = !{tours.id};
