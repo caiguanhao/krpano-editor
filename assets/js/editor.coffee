@@ -119,6 +119,7 @@ jQuery ($) ->
         ath: krpano.get 'view.hlookat'
         atv: krpano.get 'view.vlookat'
         fov: krpano.get 'view.fov'
+        scene: krpano.get 'xml.scene'
         rand: Math.random()
       path = '/tours/'+tour_id+'?'+$.param(params)
       krpano.call "loadpano('"+path+"', null, REMOVESCENES | IGNOREKEEP, BLEND(1))"

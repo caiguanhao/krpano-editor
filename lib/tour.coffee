@@ -142,6 +142,7 @@ exports.tour_xml_params = (req, params) ->
   ath = req.query.ath
   atv = req.query.atv
   fov = req.query.fov
+  scene = req.query.scene
   params.view = []
   if isNumber(ath) and -180 < ath < 180
     params.view.push 'view.hlookat='+ath
@@ -150,4 +151,5 @@ exports.tour_xml_params = (req, params) ->
   if isNumber(fov) and 0 < fov < 179
     params.view.push 'view.fov='+fov
   params.view = params.view.join('&')
+  params.scene = scene
   params

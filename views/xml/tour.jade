@@ -3,10 +3,13 @@ krpano(version='1.16' onstart='startup();')
   style(distorted='true', edge='top', name='hotspotstyle_01', oy='0', scale='0.5', url='/images/hotspot_01.png', onclick='if (to, js(hotspot_sync(get(name)))); if(linkedscene, tween(scale,0.25,0.5); tween(oy,-20,0.5); tween(alpha,0,0.5); looktohotspot(); loadscene(get(linkedscene),null,MERGE,BLEND(1)); );')
   display(movequality10='BEST' stillquality10='BEST')
   action(name='startup')
-    - if (tours.has_entry)
-      | loadscene('#{tours.entry}', '#{view}', MERGE);
+    - if (scene)
+      - loadscene = scene
+    - else if (tours.has_entry)
+      - loadscene = tours.entry
     - else
-      | loadscene(get(scene[0].name), '#{view}', MERGE);
+      - loadscene = 'get(scene[0].name)'
+    = 'loadscene(' + loadscene + ', ' + view + ', MERGE);'
   - for pano in panos
     scene(heading='', lat='', lng='', pano-id='#{pano.id}', name='panos:#{pano.id}', onstart='', thumburl='', title='#{pano.name}')
       view(fov=100, fovmax=120, fovmin=30, fovtype='MFOV', hlookat=0, limitview='auto', maxpixelzoom='2.0', vlookat=0)
