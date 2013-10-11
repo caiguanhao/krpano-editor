@@ -49,6 +49,8 @@ jQuery ($) ->
           krpano.call 'screentosphere(mouse.x, mouse.y, hotspot['+hotspot+'].ath, hotspot['+hotspot+'].atv)'
         , 30
       onup: (hotspot) ->
+        fov = krpano.get 'view.fov'
+        krpano.call 'looktohotspot('+hotspot+', '+fov+')'
         $('#pano-selector').modal('show')
         window.clearInterval window.hotspot.interval
 
