@@ -1,15 +1,35 @@
 jQuery ($) ->
+  find_pano = (pano_id, to_element, done) ->
+    pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
+    $.getJSON pano_path, (json) ->
+      to_element.find('.pano-link').attr('href', pano_path)
+      to_element.find('.pano-img').attr('src', json.panos.thumb)
+      to_element.find('.pano-name').text(json.panos.name)
+      to_element.find('.pano-desc').text(json.panos.desc)
+      done pano_path
+
   window.pano_sync = (pano_id) ->
-    window.pano_id = pano_id
-    window.pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
-    $.getJSON window.pano_path, (json) ->
-      pCS = $('#panelCurrentScene').removeClass('hide')
-      pCS.find('.pano-link').attr('href', window.pano_path)
-      pCS.find('.pano-img').attr('src', json.panos.thumb)
-      pCS.find('.pano-name').text(json.panos.name)
-      pCS.find('.pano-desc').text(json.panos.desc)
+    pCS = $('#panelCurrentScene').addClass('hide')
+    find_pano pano_id, pCS, (pano_path) ->
+      pCS.removeClass('hide')
+      window.pano_id = pano_id
+      window.pano_path = pano_path
+
+  window.hotspot_sync = (hotspot_name) ->
+    return if !krpano
+    to = krpano.get 'hotspot['+hotspot_name+'].to'
+    to = /^panos:(\d+)$/.exec(to)
+    return if !to
+    pano_id = to[1]
+    pCH = $('#panelCurrentHotspot').addClass('hide')
+    find_pano pano_id, pCH, ->
+      $('#btnRemoveHotspot').data('hotspot', hotspot_name)
+      pCH.find('.hotspot-name').text(': ' + hotspot_name)
+      pCH.removeClass('hide')
 
   pano_is_ready = (krpano) ->
+    window.krpano = krpano
+
     krpano.set 'events.onloadcomplete', 'js(pano_sync(get(scene[get(xml.scene)].pano-id)))'
 
     window.hotspot =
@@ -48,6 +68,20 @@ jQuery ($) ->
       atv = krpano.get 'hotspot['+hotspot_new+'].atv'
       $.post path + '/connect', { to: to_id, ath: ath, atv: atv }, (res) ->
         $('#pano-selector').modal('hide')
+        $.each res, (a, b) -> toastr[a](b)
+
+    $('#btnRemoveHotspot').click (e) ->
+      pano_id = window.pano_id
+      pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
+      hotspot = $('#btnRemoveHotspot').data('hotspot')
+      return if !krpano or !pano_id or !hotspot
+      to = krpano.get 'hotspot['+hotspot+'].to'
+      $.ajax
+        url: pano_path + '/hotspots'
+        type: 'DELETE'
+        data: { to: to }
+      .done (res) ->
+        $('#panelCurrentHotspot').addClass('hide')
         $.each res, (a, b) -> toastr[a](b)
 
     $('#btnAddHotspot').click (e) ->

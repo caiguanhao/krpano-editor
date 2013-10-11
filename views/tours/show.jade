@@ -66,6 +66,19 @@ block content
                 .media-body
                   h4.pano-name.media-heading
                   p.pano-desc
+          #panelCurrentHotspot.panel.panel-default.hide
+            .panel-heading
+              | Current Hotspot
+              span.hotspot-name
+            .panel-body
+              .media
+                a.pano-link.pull-left(href='#')
+                  img.pano-img.media-object(src='')
+                .media-body
+                  h4.pano-name.media-heading
+                  p.pano-desc
+              .btn-group
+                button#btnRemoveHotspot.btn.btn-default(type='button') Remove Hotspot
           .panel.panel-default
             .panel-heading Toolbox
             .panel-body

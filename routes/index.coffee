@@ -111,3 +111,7 @@ module.exports = (app, client) ->
   app.post '/tours/:tour_id/panoramas/:pano_id/connect', (req, res, next) ->
     panorama.connect client, req, next, (status, tours, panos) ->
       res.send status
+
+  app.delete '/tours/:tour_id/panoramas/:pano_id/hotspots', (req, res, next) ->
+    panorama.disconnect client, req, next, (status, tours, panos) ->
+      res.send status
