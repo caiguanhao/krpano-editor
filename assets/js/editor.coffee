@@ -9,11 +9,21 @@ jQuery ($) ->
       done pano_path
 
   window.pano_sync = (pano_id) ->
-    pCS = $('#panelCurrentScene').addClass('hide')
+    pCS = $('#panelCurrentScene')
     find_pano pano_id, pCS, (pano_path) ->
       pCS.removeClass('hide')
       window.pano_id = pano_id
       window.pano_path = pano_path
+      scene_count = krpano.get 'scene.count'
+      current_scene = krpano.get 'xml.scene'
+      $('#panelCurrentScene .scenes').empty()
+      for i in [0...scene_count]
+        name = krpano.get 'scene['+i+'].name'
+        anchor = $('<a class="select-scene" href="#">'+krpano.get('scene['+i+'].title')+'</a>')
+        if current_scene == name
+          anchor.append('<span class="pull-right glyphicon glyphicon-check"></span>')
+        anchor.data('scene', name)
+        $('#panelCurrentScene .scenes').append($('<li />').append(anchor))
 
   window.hotspot_sync = (hotspot_name) ->
     return if !krpano
@@ -96,6 +106,9 @@ jQuery ($) ->
       $('#panelCurrentScene').addClass('hide')
       path = '/tours/'+tour_id+'?'+Math.random()
       krpano.call "loadpano('"+path+"', null, REMOVESCENES | IGNOREKEEP, BLEND(1))"
+
+    $(document).on 'click', '.select-scene', ->
+      krpano.call 'loadscene('+$(this).data('scene')+')'
 
   embedpano
     swf: "/swf/krpano.swf"

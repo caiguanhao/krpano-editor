@@ -60,12 +60,14 @@ block content
           #panelCurrentScene.panel.panel-default.hide
             .panel-heading Current Scene
             .panel-body
-              .media
-                a.pano-link.pull-left(href='#')
-                  img.pano-img.media-object(src='')
-                .media-body
-                  h4.pano-name.media-heading
-                  p.pano-desc
+              a.pano-link.pull-left(href='#')
+                img.pano-img(src='')
+              .btn-group.scene-selector
+                button.btn.btn-default.dropdown-toggle(type='button', data-toggle='dropdown')
+                  span.pano-name
+                  &nbsp;&nbsp;&nbsp;
+                  span.caret
+                ul.scenes.dropdown-menu(role='menu')
           #panelCurrentHotspot.panel.panel-default.hide
             .panel-heading
               | Current Hotspot

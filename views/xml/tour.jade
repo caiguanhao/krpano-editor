@@ -8,7 +8,7 @@ krpano(version='1.16' onstart='startup();')
     - else
       | loadscene(get(scene[0].name), null, MERGE);
   - for pano in panos
-    scene(heading='', lat='', lng='', pano-id='#{pano.id}', name='panos:#{pano.id}', onstart='', thumburl='', title='')
+    scene(heading='', lat='', lng='', pano-id='#{pano.id}', name='panos:#{pano.id}', onstart='', thumburl='', title='#{pano.name}')
       view(fov=100, fovmax=120, fovmin=30, fovtype='MFOV', hlookat=0, limitview='auto', maxpixelzoom='2.0', vlookat=0)
       image
         sphere(url=pano.image)
