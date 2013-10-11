@@ -136,3 +136,18 @@ exports.delete = (client, req, next, callback) ->
       client.lrem 'tours', 0, key
 
       callback { success: 'Successfully deleted a tour.' }
+
+exports.tour_xml_params = (req, params) ->
+  isNumber = (n) -> !isNaN(parseFloat(n)) && isFinite(n);
+  ath = req.query.ath
+  atv = req.query.atv
+  fov = req.query.fov
+  params.view = []
+  if isNumber(ath) and -180 < ath < 180
+    params.view.push 'view.hlookat='+ath
+  if isNumber(atv) and -90 < atv < 90
+    params.view.push 'view.vlookat='+atv
+  if isNumber(fov) and 0 < fov < 179
+    params.view.push 'view.fov='+fov
+  params.view = params.view.join('&')
+  params

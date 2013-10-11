@@ -20,7 +20,7 @@ module.exports = (app, client) ->
         switch req.params.action
           when undefined
             res.format
-              xml: -> res.render 'xml/tour', params
+              xml: -> res.render 'xml/tour', tour.tour_xml_params(req, params)
               html: ->
                 params.view = req.session.tour_view || 'tour'
                 res.render 'tours/show', params

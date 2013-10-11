@@ -115,8 +115,14 @@ jQuery ($) ->
 
     $('#btnReload').click (e) ->
       $('#panelCurrentScene').addClass('hide')
-      path = '/tours/'+tour_id+'?'+Math.random()
+      params =
+        ath: krpano.get 'view.hlookat'
+        atv: krpano.get 'view.vlookat'
+        fov: krpano.get 'view.fov'
+        rand: Math.random()
+      path = '/tours/'+tour_id+'?'+$.param(params)
       krpano.call "loadpano('"+path+"', null, REMOVESCENES | IGNOREKEEP, BLEND(1))"
+      toastr['success'] 'Tour reloaded.'
 
     $(document).on 'click', '.select-scene', ->
       krpano.call 'loadscene('+$(this).data('scene')+')'
