@@ -234,21 +234,34 @@ exports.connect = (client, req, next, callback) ->
       callback { success: 'Successfully connected two scenes.' }, tour, pano
 
 exports.disconnect = (client, req, next, callback) ->
-  if !req.body.to then next(); return
+  filter_member = (members, key, to_do) ->
+    members.forEach (member) ->
+      mem = JSON.parse(member)
+      if mem['to'] == key then to_do member
+
+  if !req.body.to or !/^panos:\d+$/.test(req.body.to) then next(); return
+
   pano_exists client, req, next, (status, tour, pano) ->
     pano_key = 'panos:' + pano.id
     to_pano_key = req.body.to
+
     client.smembers pano_key + ':connections', (err, members) ->
       if err then next(); return
-      members_to_remove = []
-      members.forEach (member) ->
-        mem = JSON.parse(member)
-        if mem['to'] == to_pano_key then members_to_remove.push member
-      if members_to_remove.length == 0
-        callback { warning: 'No hotspots to remove.' }, tour, pano
-        return
-      client.srem pano_key + ':connections', members_to_remove, (err, result) ->
-        if result > 0
-          callback { success: 'Successfully removed ' + result + ' hotspots.' }, tour, pano
-        else
-          callback { error: 'Failed to remove hotspots.' }, tour, pano
+      members_to_remove1 = []
+      filter_member members, to_pano_key, (member) -> members_to_remove1.push member
+
+      client.smembers to_pano_key + ':connections', (err, members) ->
+        members_to_remove2 = []
+        filter_member members, pano_key, (member) -> members_to_remove2.push member
+
+        if members_to_remove1.length == 0 or members_to_remove2.length == 0
+          callback { warning: 'No hotspots to remove.' }, tour, pano
+          return
+
+        client.srem pano_key + ':connections', members_to_remove1, (err, result1) ->
+          client.srem to_pano_key + ':connections', members_to_remove2, (err, result2) ->
+            result = result1 + result2
+            if result > 0
+              callback { success: 'Successfully removed ' + result + ' hotspots.' }, tour, pano
+            else
+              callback { error: 'Failed to remove hotspots.' }, tour, pano
