@@ -51,7 +51,7 @@ jQuery ($) ->
         $('#panelCurrentHotspot .hotspots').append($('<li />').append(anchor))
 
     if hotspot_name
-      to = krpano.get 'hotspot['+hotspot_name+'].to'
+      to = krpano.get 'hotspot['+hotspot_name+'].linkedscene'
       to = /^panos:(\d+)$/.exec(to)
       return if !to
       pano_id = to[1]
@@ -62,9 +62,6 @@ jQuery ($) ->
         if follow_hotspot
           fov = krpano.get 'view.fov'
           krpano.call 'looktohotspot('+hotspot_name+', '+fov+')'
-          to = krpano.get 'hotspot['+hotspot_name+'].to'
-          krpano.set 'hotspot['+hotspot_name+'].to', ''
-          krpano.set 'hotspot['+hotspot_name+'].linkedscene', to
         list_hotspots()
     else
       list_hotspots()
@@ -79,10 +76,6 @@ jQuery ($) ->
     $('#btnRemoveHotspot').prop('disabled', true)
     hotspot_count = krpano.get 'hotspot.count'
     for i in [0...hotspot_count]
-      linkedscene = krpano.get 'hotspot['+i+'].linkedscene'
-      if linkedscene
-        krpano.set 'hotspot['+i+'].linkedscene', ''
-        krpano.set 'hotspot['+i+'].to', linkedscene
       krpano.set 'hotspot['+i+'].ondown', 'js(hotspot.ondown('+i+'))'
       krpano.set 'hotspot['+i+'].onup', 'js(hotspot.onup('+i+'))'
 
@@ -116,6 +109,14 @@ jQuery ($) ->
         if `krpano.get('hotspot['+hotspot+'].ath') != krpano.get('hotspot['+hotspot+']._ath') ||
         krpano.get('hotspot['+hotspot+'].ath') != krpano.get('hotspot['+hotspot+']._ath')`
           $('#hotspot-adjust').modal('show')
+        else
+          linkedscene = krpano.get 'hotspot['+hotspot+'].linkedscene'
+          if linkedscene
+            krpano.call 'tween(hotspot['+hotspot+'].scale,0.25,0.5)'
+            krpano.call 'tween(hotspot['+hotspot+'].oy,-20,0.5)'
+            krpano.call 'tween(hotspot['+hotspot+'].alpha,0,0.5)'
+            krpano.call 'looktohotspot('+hotspot+')'
+            krpano.call 'loadscene('+linkedscene+',null,MERGE,BLEND(1))'
         return
 
     $('#pano-selector').on 'show.bs.modal', ->
@@ -150,8 +151,7 @@ jQuery ($) ->
       pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
       hotspot = window.current_hotspot
       return if !krpano or !pano_id or !hotspot
-      to = krpano.get 'hotspot['+hotspot+'].to'
-      if !to then to = krpano.get 'hotspot['+hotspot+'].linkedscene'
+      to = krpano.get 'hotspot['+hotspot+'].linkedscene'
       $.ajax
         url: pano_path + '/hotspots'
         type: 'DELETE'
@@ -195,8 +195,7 @@ jQuery ($) ->
       pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
       hotspot = window.current_hotspot
       return if !krpano or !pano_id or !hotspot
-      to = krpano.get 'hotspot['+hotspot+'].to'
-      if !to then to = krpano.get 'hotspot['+hotspot+'].linkedscene'
+      to = krpano.get 'hotspot['+hotspot+'].linkedscene'
       $.ajax
         url: pano_path + '/hotspots'
         type: 'PUT'

@@ -19,4 +19,4 @@ krpano(version='1.16' onstart='startup();')
       - for conn in pano.connections
         - conn = JSON.parse(conn)
         - index += 1
-        hotspot(_ath=conn.ath, _atv=conn.atv, ath=conn.ath, atv=conn.atv, to=conn.to, name='hotspot#{index}' style='hotspotstyle_01')
+        hotspot(_ath=conn.ath, _atv=conn.atv, ath=conn.ath, atv=conn.atv, linkedscene=conn.to, name='hotspot#{index}' style='hotspotstyle_01')
