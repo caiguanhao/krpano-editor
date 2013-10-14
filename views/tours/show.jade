@@ -92,7 +92,9 @@ block content
             .panel-heading Toolbox
             .panel-body
               .btn-group
-                button#btnReload.btn.btn-default(type='button') Reload
+                button#btnReload.btn.btn-default(type='button')
+                  span.glyphicon.glyphicon-refresh
+                  | &nbsp;Reload
       script.
         var tour_id = !{tours.id};
       != js('editor')
