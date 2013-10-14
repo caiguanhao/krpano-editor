@@ -81,7 +81,7 @@ block content
                     span.caret
                   ul.hotspots.dropdown-menu(role='menu')
                 .clearfix
-              .btn-group
+              .btn-group.panel-btn
                 button#btnAddHotspot.btn.btn-default(type='button', disabled)
                   span.glyphicon.glyphicon-plus
                   | &nbsp;Add Hotspot
@@ -108,3 +108,17 @@ block content
           .modal-footer
             button.btn.btn-default(type='button', data-dismiss='modal') Close
             button#linkToPano.btn.btn-primary(type='button', disabled) Link to This Panorama
+
+    #hotspot-adjust.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+            h4.modal-title Move Hotspot
+          .modal-body
+            | You can choose to move this hotspot only.
+            | Or you can also try moving relevant hotspots in other scenes besides this hotspot.
+            | If you want to cancel, close this dialog box and click the Reload button to reload the tour.
+          .modal-footer
+            button#btnMoveCurrent.btn.btn-primary(type='button') Move This Hotspot Only
+            button#btnMoveRelevant.btn.btn-primary(type='button') Also Try Moving Relevant Hotspots

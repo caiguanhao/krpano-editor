@@ -1,4 +1,6 @@
 jQuery ($) ->
+  hotspot_new = 'hotspot_new'
+
   find_pano = (pano_id, to_element, done) ->
     pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
     $.getJSON pano_path, (json) ->
@@ -30,7 +32,7 @@ jQuery ($) ->
         hotspot_sync()
     return
 
-  window.hotspot_sync = (hotspot_name) ->
+  window.hotspot_sync = (hotspot_name, follow_hotspot) ->
     return if !krpano
 
     pCH = $('#panelCurrentHotspot')
@@ -57,11 +59,12 @@ jQuery ($) ->
         window.current_hotspot = hotspot_name
         pCH.find('.hotspot-name').text(hotspot_name)
         $('#btnRemoveHotspot').prop('disabled', false)
-        fov = krpano.get 'view.fov'
-        krpano.call 'looktohotspot('+hotspot_name+', '+fov+')'
-        to = krpano.get 'hotspot['+hotspot_name+'].to'
-        krpano.set 'hotspot['+hotspot_name+'].to', ''
-        krpano.set 'hotspot['+hotspot_name+'].linkedscene', to
+        if follow_hotspot
+          fov = krpano.get 'view.fov'
+          krpano.call 'looktohotspot('+hotspot_name+', '+fov+')'
+          to = krpano.get 'hotspot['+hotspot_name+'].to'
+          krpano.set 'hotspot['+hotspot_name+'].to', ''
+          krpano.set 'hotspot['+hotspot_name+'].linkedscene', to
         list_hotspots()
     else
       list_hotspots()
@@ -80,8 +83,10 @@ jQuery ($) ->
       if linkedscene
         krpano.set 'hotspot['+i+'].linkedscene', ''
         krpano.set 'hotspot['+i+'].to', linkedscene
+      krpano.set 'hotspot['+i+'].ondown', 'js(hotspot.ondown('+i+'))'
+      krpano.set 'hotspot['+i+'].onup', 'js(hotspot.onup('+i+'))'
 
-  window.pano_click = (s) ->
+  window.pano_click = () ->
     hotspot_panel_return_default()
     return
 
@@ -89,11 +94,13 @@ jQuery ($) ->
     window.krpano = krpano
 
     krpano.set 'events.onloadcomplete', 'js(pano_sync(get(scene[get(xml.scene)].pano-id)))'
-    krpano.set 'events.onclick', 'js(pano_click(s))'
+    krpano.set 'events.onclick', 'js(pano_click())'
 
     window.hotspot =
       interval: null
       ondown: (hotspot) ->
+        hotspot = krpano.get 'hotspot['+hotspot+'].name' if /^\d+$/.test(hotspot)
+        hotspot_sync hotspot
         window.hotspot.interval = window.setInterval ->
           krpano.call 'screentosphere(mouse.x, mouse.y, hotspot['+hotspot+'].ath, hotspot['+hotspot+'].atv)'
         , 30
@@ -101,8 +108,14 @@ jQuery ($) ->
       onup: (hotspot) ->
         fov = krpano.get 'view.fov'
         krpano.call 'looktohotspot('+hotspot+', '+fov+')'
-        $('#pano-selector').modal('show')
         window.clearInterval window.hotspot.interval
+        if hotspot == hotspot_new
+          $('#pano-selector').modal('show')
+        return
+      click: (hotspot) ->
+        if `krpano.get('hotspot['+hotspot+'].ath') != krpano.get('hotspot['+hotspot+']._ath') ||
+        krpano.get('hotspot['+hotspot+'].ath') != krpano.get('hotspot['+hotspot+']._ath')`
+          $('#hotspot-adjust').modal('show')
         return
 
     $('#pano-selector').on 'show.bs.modal', ->
@@ -120,8 +133,6 @@ jQuery ($) ->
             $('#pano-list').find('a.thumbnail').not(this).removeClass('active')
             $('#linkToPano').prop('disabled', $('#pano-list').find('a.thumbnail.active').length != 1)
           $('<div class="col-sm-6 col-md-4" />').append(item).appendTo('#pano-list')
-
-    hotspot_new = 'hotspot_new'
 
     $('#linkToPano').click (e) ->
       path = window.pano_path
@@ -177,7 +188,35 @@ jQuery ($) ->
       e.preventDefault()
       hotspot = $(this).data('hotspot')
       return if !hotspot
-      hotspot_sync hotspot
+      hotspot_sync hotspot, true
+
+    move_hotspot = (move_relevant) ->
+      pano_id = window.pano_id
+      pano_path = '/tours/' + tour_id + '/panoramas/' + pano_id
+      hotspot = window.current_hotspot
+      return if !krpano or !pano_id or !hotspot
+      to = krpano.get 'hotspot['+hotspot+'].to'
+      if !to then to = krpano.get 'hotspot['+hotspot+'].linkedscene'
+      $.ajax
+        url: pano_path + '/hotspots'
+        type: 'PUT'
+        data:
+          _atv: krpano.get 'hotspot['+hotspot+']._atv'
+          _ath: krpano.get 'hotspot['+hotspot+']._ath'
+          to: to
+          atv: krpano.get 'hotspot['+hotspot+'].atv'
+          ath: krpano.get 'hotspot['+hotspot+'].ath'
+          move_relevant: if move_relevant then 'yes' else 'no'
+      .done (res) ->
+        $('#hotspot-adjust').modal('hide')
+        $.each res, (a, b) -> toastr[a](b)
+        $('#btnReload').trigger('click')
+
+    $('#btnMoveCurrent').click (e) ->
+      move_hotspot false
+
+    $('#btnMoveRelevant').click (e) ->
+      move_hotspot true
 
   embedpano
     swf: "/swf/krpano.swf"

@@ -233,6 +233,50 @@ exports.connect = (client, req, next, callback) ->
       client.sadd to_pano_key + ':connections', JSON.stringify(data)
       callback { success: 'Successfully connected two scenes.' }, tour, pano
 
+exports.reconnect = (client, req, next, callback) ->
+  move_relevant = req.body.move_relevant == 'yes'
+  isNumber = (n) -> !isNaN(parseFloat(n)) && isFinite(n);
+  _ath = req.body._ath
+  _atv = req.body._atv
+  ath = req.body.ath
+  atv = req.body.atv
+  if !isNumber(_ath) or !isNumber(_atv) or !isNumber(ath) or !isNumber(atv) then next(); return
+  if _ath > 180 or _ath < -180 or _atv > 90 or _atv < -90 then next(); return
+  if ath > 180 or ath < -180 or atv > 90 or atv < -90 then next(); return
+  if !req.body.to or !/^panos:\d+$/.test(req.body.to) then next(); return
+  pano_exists client, req, next, (status, tour, pano) ->
+    pano_key = 'panos:' + pano.id
+    to_pano_key = req.body.to
+    _ath = parseFloat _ath
+    _atv = parseFloat _atv
+    data =
+      ath: _ath.toFixed(3)
+      atv: _atv.toFixed(3)
+      to: to_pano_key
+    client.srem pano_key + ':connections', JSON.stringify(data), (err, count) ->
+      if err or count == 0 then next(); return
+      ath = parseFloat ath
+      atv = parseFloat atv
+      data =
+        ath: ath.toFixed(3)
+        atv: atv.toFixed(3)
+        to: to_pano_key
+      client.sadd pano_key + ':connections', JSON.stringify(data)
+      if move_relevant
+        data =
+          ath: ((_ath + 180) % 360).toFixed(3)
+          atv: (-1 * _atv).toFixed(3)
+          to: pano_key
+        client.srem to_pano_key + ':connections', JSON.stringify(data), (err, count) ->
+          data =
+            ath: ((ath + 180) % 360).toFixed(3)
+            atv: (-1 * atv).toFixed(3)
+            to: pano_key
+          client.sadd to_pano_key + ':connections', JSON.stringify(data)
+          callback { success: 'Successfully moved 2 hotspots.' }, tour, pano
+      else
+        callback { success: 'Successfully moved hotspot.' }, tour, pano
+
 exports.disconnect = (client, req, next, callback) ->
   filter_member = (members, key, to_do) ->
     members.forEach (member) ->

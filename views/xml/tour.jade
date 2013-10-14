@@ -1,6 +1,6 @@
 !!! xml
 krpano(version='1.16' onstart='startup();')
-  style(distorted='true', edge='top', name='hotspotstyle_01', oy='0', scale='0.5', url='/images/hotspot_01.png', onclick='if (to, js(hotspot_sync(get(name)))); if(linkedscene, tween(scale,0.25,0.5); tween(oy,-20,0.5); tween(alpha,0,0.5); looktohotspot(); loadscene(get(linkedscene),null,MERGE,BLEND(1)); );')
+  style(distorted='true', edge='top', name='hotspotstyle_01', oy='0', scale='0.5', url='/images/hotspot_01.png', onclick='js(hotspot.click(get(name)))')
   display(movequality10='BEST' stillquality10='BEST')
   action(name='startup')
     - if (scene)
@@ -19,4 +19,4 @@ krpano(version='1.16' onstart='startup();')
       - for conn in pano.connections
         - conn = JSON.parse(conn)
         - index += 1
-        hotspot(ath=conn.ath, atv=conn.atv, to=conn.to, name='hotspot#{index}' style='hotspotstyle_01')
+        hotspot(_ath=conn.ath, _atv=conn.atv, ath=conn.ath, atv=conn.atv, to=conn.to, name='hotspot#{index}' style='hotspotstyle_01')
