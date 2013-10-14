@@ -78,6 +78,7 @@ jQuery ($) ->
     for i in [0...hotspot_count]
       krpano.set 'hotspot['+i+'].ondown', 'js(hotspot.ondown('+i+'))'
       krpano.set 'hotspot['+i+'].onup', 'js(hotspot.onup('+i+'))'
+    window.last_selected_hotspot = null
 
   window.pano_click = () ->
     hotspot_panel_return_default()
@@ -109,7 +110,7 @@ jQuery ($) ->
         if `krpano.get('hotspot['+hotspot+'].ath') != krpano.get('hotspot['+hotspot+']._ath') ||
         krpano.get('hotspot['+hotspot+'].ath') != krpano.get('hotspot['+hotspot+']._ath')`
           $('#hotspot-adjust').modal('show')
-        else
+        else if window.last_selected_hotspot == hotspot
           linkedscene = krpano.get 'hotspot['+hotspot+'].linkedscene'
           if linkedscene
             krpano.call 'tween(hotspot['+hotspot+'].scale,0.25,0.5)'
@@ -117,6 +118,8 @@ jQuery ($) ->
             krpano.call 'tween(hotspot['+hotspot+'].alpha,0,0.5)'
             krpano.call 'looktohotspot('+hotspot+')'
             krpano.call 'loadscene('+linkedscene+',null,MERGE,BLEND(1))'
+        else
+          window.last_selected_hotspot = hotspot
         return
 
     $('#pano-selector').on 'show.bs.modal', ->
